@@ -8,9 +8,9 @@ extension [Input](self: Parser[Input])
         case 0 => Parser.unit(List())
         case n =>
             for {
-                self_output <- self
-                outputs <- atLeast(n - 1)
-            } yield self_output :: outputs
+                selfOutput <- self
+                otherOutputs <- atLeast(n - 1)
+            } yield selfOutput :: otherOutputs
 
     def andThen(
         other: Parser[Input]
@@ -25,3 +25,9 @@ extension [Input](self: Parser[Input])
 
     def thenSkip(other: Parser[Input]): Parser[Input] { type Output = self.Output } =
         self.andThen(other).map(_._1)
+
+    def between(
+        first: Parser[Input],
+        second: Parser[Input]
+    ): Parser[Input] { type Output = self.Output } =
+        first.skipThen(self).thenSkip(second)
