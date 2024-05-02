@@ -6,6 +6,7 @@
       <option name="FORMATTER" value="1" />
       <option name="MULTILINE_STRING_CLOSING_QUOTES_ON_NEW_LINE" value="true" />
       <option name="TYPE_ANNOTATION_EXCLUDE_MEMBER_OF_ANONYMOUS_CLASS" value="true" />
+      <option name="TRAILING_COMMA_MODE" value="TRAILING_COMMA_ADD_WHEN_MULTILINE" />
     </ScalaCodeStyleSettings>
   </code_scheme>
 </component>
