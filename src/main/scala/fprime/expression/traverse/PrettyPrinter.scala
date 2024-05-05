@@ -1,6 +1,6 @@
 package fprime.expression.traverse
 
-import fprime.expression.{Abstraction, Application, Expression, Variable, given}
+import fprime.expression.{Abstraction, Application, Expression, Variable}
 
 import scala.PartialFunction.cond
 

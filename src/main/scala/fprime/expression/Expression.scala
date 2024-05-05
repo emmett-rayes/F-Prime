@@ -7,18 +7,39 @@ import fprime.parsing.{Parsable, Tokens}
 import scala.util.Failure
 
 sealed trait Expression
-case class Variable(symbol: Symbol) extends Expression
-case class Abstraction[P <: ExprSpec, B <: ExprSpec](parameter: P, body: B) extends Expression
-case class Application[C <: ExprSpec, A <: ExprSpec](callable: C, argument: A)
+
+class Variable(val symbol: Symbol) extends Expression
+
+object Variable:
+    def unapply(variable: Variable): Tuple1[Symbol] = Tuple1(variable.symbol)
+
+class Abstraction[P <: Expression, B <: Expression](val parameter: P, val body: B)
     extends Expression
+
+object Abstraction:
+    def unapply[P <: Expression, B <: Expression](abstraction: Abstraction[P, B]): (P, B) =
+        (abstraction.parameter, abstraction.body)
+
+class Application[C <: Expression, A <: Expression](val callable: C, val argument: A)
+    extends Expression
+
+object Application:
+    def unapply[C <: Expression, A <: Expression](application: Application[C, A]): (C, A) =
+        (application.callable, application.argument)
+
+given [T <: Expression, E <: Expression](using
+    downcast: Conversion[E, T & E],
+    expression: Parsable[E],
+): Parsable[T] with
+    override lazy val parser: Parser[Tokens, T] = expression.parser.map(identity)
 
 given (using symbol: Parsable[Symbol]): Parsable[Variable] with
     override lazy val parser: Parser[Tokens, Variable] = symbol.parser.map(s => Variable(s))
 
-given [P <: ExprSpec, B <: ExprSpec](using
+given [P <: Expression, B <: Expression](using
     parameter: Parsable[P],
     body: Parsable[B],
-    upcast: Conversion[Abstraction[P, B], B],
+    downcast: Conversion[Abstraction[P, B], B & Abstraction[P, B]], // shape preserving
 ): Parsable[Abstraction[P, B]] with
     private val parameters = parameter.parser.atLeast(1).thenSkip(Literal.parser("."))
     private val lambda =
@@ -31,15 +52,14 @@ given [P <: ExprSpec, B <: ExprSpec](using
             .map((parameters, body) =>
                 parameters
                     .foldRight(body)((parameter: P, body: B) => Abstraction(parameter, body): B)
-                    ._1
                     .asInstanceOf[Abstraction[P, B]]
                 // downcast safety: cannot fail because we've upcasted in the last folding step
             )
 
-given [C <: ExprSpec, A <: ExprSpec](using
+given [C <: Expression, A <: Expression](using
     callable: Parsable[C],
     argument: Parsable[A],
-    upcast: Conversion[Application[C, A], C],
+    downcast: Conversion[Application[C, A], C & Application[C, A]], // shape preserving
 ): Parsable[Application[C, A]] with
     private val parens = this.parser.between(Literal.parser("("), Literal.parser(")"))
 
@@ -48,9 +68,7 @@ given [C <: ExprSpec, A <: ExprSpec](using
             .andThen(argument.parser.atLeast(1))
             .map((head, tail) =>
                 tail.foldLeft(head)((callable, argument) => Application(callable, argument): C)
-                    ._1
                     .asInstanceOf[Application[C, A]]
-                // downcast safety: cannot fail because we've upcasted in the last folding step
             )
 
 given (using

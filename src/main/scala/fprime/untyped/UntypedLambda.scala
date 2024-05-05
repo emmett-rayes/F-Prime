@@ -1,53 +1,46 @@
 package fprime.untyped
 
 import fprime.expression.{*, given}
+import fprime.parser.Parser
 import fprime.parser.combinators.map
-import fprime.parser.{Parser, given}
 import fprime.parsing.{Parsable, Tokens, summonParser}
 
-type UntypedVariableInner = Variable
-type UntypedAbstractionInner = Abstraction[UntypedVariable, UntypedLambda]
-type UntypedApplicationInner = Application[UntypedLambda, UntypedLambda]
+private given [A <: B, B]: Conversion[A, B] = identity
+private type UntypedVariableInner = Variable
+private type UntypedAbstractionInner = Abstraction[UntypedVariable, UntypedLambda]
+private type UntypedApplicationInner = Application[UntypedLambda, UntypedLambda]
 
-sealed trait UntypedLambda extends ExprSpec
+type UntypedLambda = Expression & (UntypedVariable | UntypedAbstraction | UntypedApplication)
 
-case class UntypedVariable(term: UntypedVariableInner)
-    extends UntypedLambda
-    with Product1[UntypedVariableInner]
+case class UntypedVariable(override val symbol: Symbol) extends UntypedVariableInner(symbol)
 
-case class UntypedAbstraction(term: UntypedAbstractionInner)
-    extends UntypedLambda
-    with Product1[UntypedAbstractionInner]
+case class UntypedAbstraction(
+    override val parameter: UntypedVariable,
+    override val body: UntypedLambda,
+) extends UntypedAbstractionInner(parameter, body)
 
-case class UntypedApplication(term: UntypedApplicationInner)
-    extends UntypedLambda
-    with Product1[UntypedApplicationInner]
+case class UntypedApplication(
+    override val callable: UntypedLambda,
+    override val argument: UntypedLambda,
+) extends UntypedApplicationInner(callable, argument)
 
-given Conversion[UntypedVariable, UntypedVariableInner] = _._1
-given Conversion[UntypedVariableInner, UntypedVariable] = UntypedVariable(_)
-object UntypedVariable:
-    def unapply(variable: UntypedVariable): UntypedVariableInner = variable
+private given Conversion[UntypedVariableInner, UntypedVariable] =
+    variable => UntypedVariable(variable.symbol)
 
-given Conversion[UntypedAbstraction, UntypedAbstractionInner] = _._1
-given Conversion[UntypedAbstractionInner, UntypedAbstraction] = UntypedAbstraction(_)
-object UntypedAbstraction:
-    def unapply(abstraction: UntypedAbstraction): UntypedAbstractionInner = abstraction
+private given Conversion[UntypedAbstractionInner, UntypedAbstraction] =
+    abstraction => UntypedAbstraction(abstraction.parameter, abstraction.body)
 
-given Conversion[UntypedApplication, UntypedApplicationInner] = _._1
-given Conversion[UntypedApplicationInner, UntypedApplication] = UntypedApplication(_)
-object UntypedApplication:
-    def unapply(application: UntypedApplication): UntypedApplicationInner = application
+private given Conversion[UntypedApplicationInner, UntypedApplication] =
+    application => UntypedApplication(application.callable, application.argument)
 
 given Parsable[UntypedLambda] with
-    given Parsable[Abstraction[?, ?]] with
+    private given Parsable[Abstraction[?, ?]] with
         override lazy val parser: Parser[Tokens, Abstraction[?, ?]] =
-            summonParser[UntypedAbstraction]
+            summonParser[UntypedAbstraction].map(_.asInstanceOf[Abstraction[?, ?]])
 
-    given Parsable[Application[?, ?]] with
+    private given Parsable[Application[?, ?]] with
         override lazy val parser: Parser[Tokens, Application[?, ?]] =
-            summonParser[UntypedApplication]
-
-    private val expression = summonParser[Expression]
+            summonParser[UntypedApplication].map(_.asInstanceOf[Application[?, ?]])
 
     override lazy val parser: Parser[Tokens, UntypedLambda] =
         // cast safety: the correct parser was supplied by the local given

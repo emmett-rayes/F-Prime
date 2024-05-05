@@ -1,7 +1,5 @@
 package fprime.parser
 
-import fprime.parser.combinators.map
-
 import scala.util.Try
 
 case class ParseError[Input](input: Input, message: String) extends Exception(message)
@@ -11,9 +9,6 @@ type ParserResult[Input, Output] = Try[(Input, Output)]
 extension [Input, Output](self: ParserResult[Input, Output])
     def remaining: Try[Input] = self.map(_._1)
     def result: Try[Output] = self.map(_._2)
-
-given [I, A, B](using Conversion[A, B]): Conversion[Parser[I, A], Parser[I, B]] =
-    _.map(identity)
 
 trait Parser[Input, +Output]:
     def parse(input: Input): ParserResult[Input, Output]

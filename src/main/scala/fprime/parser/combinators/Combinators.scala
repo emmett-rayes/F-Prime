@@ -24,7 +24,7 @@ extension [Input, Output](self: => Parser[Input, Output])
                     else
                         throw ParseError(
                           remaining,
-                          s"Expected at least ${n - outputs.size} more element(s).",
+                          s"Expected at least ${n - outputs.size} more element(s) after $outputs.",
                         )
         }
 
