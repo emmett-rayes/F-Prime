@@ -1,10 +1,10 @@
 package fprime.language.untyped
 
 import fprime.expression.{Abstraction, Application, Expression, Variable, given}
-import fprime.expression.Parsing.{Parsable, Tokens, summonParser}
 import fprime.language.{Language, given}
-import fprime.parser.{Parser, given}
 import fprime.parser.combinators.map
+import fprime.parser.{Parser, given}
+import fprime.parsing.{Parsable, Tokens, summonParser}
 
 type UntypedVariableInner = Variable
 type UntypedAbstractionInner = Abstraction[UntypedVariable, UntypedLambda]

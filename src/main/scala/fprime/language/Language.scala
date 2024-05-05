@@ -1,8 +1,8 @@
 package fprime.language
 
 import fprime.expression.Expression
-import fprime.expression.Parsing.{Parsable, Tokens}
 import fprime.parser.{Parser, given}
+import fprime.parsing.{Parsable, Tokens}
 
 trait Language extends Product1[Expression]
 
