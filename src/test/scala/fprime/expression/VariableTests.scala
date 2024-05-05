@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers.{matchPattern, should}
 
 import scala.util.{Failure, Success}
 
-class VariableTests extends AnyFunSuite {
+class VariableTests extends AnyFunSuite:
     test("variable parser (green)") {
         val input = "x".asTokens
         summonParser[Variable].parse(input) should matchPattern {
@@ -18,4 +18,3 @@ class VariableTests extends AnyFunSuite {
         val input = "->".asTokens
         summonParser[Variable].parse(input) should matchPattern { case Failure(_) => }
     }
-}

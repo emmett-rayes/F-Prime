@@ -8,7 +8,7 @@ import org.scalatest.matchers.should.Matchers.{matchPattern, should}
 
 import scala.util.{Failure, Success}
 
-class LiteralTests extends AnyFunSuite {
+class LiteralTests extends AnyFunSuite:
     test("literal parser (green)") {
         val parser = Literal.parser("hello")
         val input = "hello, world!".asTokens
@@ -23,4 +23,3 @@ class LiteralTests extends AnyFunSuite {
         val input = "goodbye, world!".asTokens
         parser.parse(input) should matchPattern { case Failure(_) => }
     }
-}
