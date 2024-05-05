@@ -21,7 +21,7 @@ given [P, B <: Expression | Product1[Expression]](using
 ): Parsable[Abstraction[P, B]] with
     private val parameters = parameter.parser.atLeast(1).thenSkip(Literal.parser("."))
     private val lambda =
-        Literal.parser("λ").orElse(Literal.parser("@")).orElse(Literal.parser("\\"))
+        Literal.parser("λ") `orElse` Literal.parser("@") `orElse` Literal.parser("\\")
 
     override lazy val parser: Parser[Tokens, Abstraction[P, B]] =
         lambda
