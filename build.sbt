@@ -5,6 +5,7 @@ ThisBuild / scalaVersion := "3.4.1"
 lazy val root = (project in file("."))
     .settings(
       name := "f-prime",
+      scalacOptions += "-explain",
       scalacOptions += "-feature",
       scalacOptions += "-language:strictEquality",
       scalacOptions += "-language:implicitConversions",
