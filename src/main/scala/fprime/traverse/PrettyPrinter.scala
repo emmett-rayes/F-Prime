@@ -1,4 +1,4 @@
-package fprime.expression.traverse
+package fprime.traverse
 
 import fprime.expression.{Abstraction, Application, Expression, Variable}
 
