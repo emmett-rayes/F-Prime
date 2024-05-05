@@ -6,6 +6,7 @@
       <option name="implicitConversions" value="true" />
       <option name="featureWarnings" value="true" />
       <parameters>
+        <parameter value="-explain" />
         <parameter value="-language:strictEquality" />
       </parameters>
     </profile>

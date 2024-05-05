@@ -1,6 +1,6 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
-    <option name="RIGHT_MARGIN" value="120" />
+    <option name="RIGHT_MARGIN" value="96" />
     <option name="SOFT_MARGINS" value="96" />
     <ScalaCodeStyleSettings>
       <option name="FORMATTER" value="1" />
