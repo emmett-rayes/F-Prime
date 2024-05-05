@@ -1,7 +1,6 @@
-package fprime.language.untyped
+package fprime.untyped
 
-import fprime.expression.{Abstraction, Application, Expression, Variable, given}
-import fprime.language.{Language, given}
+import fprime.expression.{*, given}
 import fprime.parser.combinators.map
 import fprime.parser.{Parser, given}
 import fprime.parsing.{Parsable, Tokens, summonParser}
@@ -10,7 +9,7 @@ type UntypedVariableInner = Variable
 type UntypedAbstractionInner = Abstraction[UntypedVariable, UntypedLambda]
 type UntypedApplicationInner = Application[UntypedLambda, UntypedLambda]
 
-sealed trait UntypedLambda extends Language
+sealed trait UntypedLambda extends ExprSpec
 
 case class UntypedVariable(term: UntypedVariableInner)
     extends UntypedLambda
@@ -26,12 +25,18 @@ case class UntypedApplication(term: UntypedApplicationInner)
 
 given Conversion[UntypedVariable, UntypedVariableInner] = _._1
 given Conversion[UntypedVariableInner, UntypedVariable] = UntypedVariable(_)
+object UntypedVariable:
+    def unapply(variable: UntypedVariable): UntypedVariableInner = variable
 
 given Conversion[UntypedAbstraction, UntypedAbstractionInner] = _._1
 given Conversion[UntypedAbstractionInner, UntypedAbstraction] = UntypedAbstraction(_)
+object UntypedAbstraction:
+    def unapply(abstraction: UntypedAbstraction): UntypedAbstractionInner = abstraction
 
 given Conversion[UntypedApplication, UntypedApplicationInner] = _._1
 given Conversion[UntypedApplicationInner, UntypedApplication] = UntypedApplication(_)
+object UntypedApplication:
+    def unapply(application: UntypedApplication): UntypedApplicationInner = application
 
 given Parsable[UntypedLambda] with
     given Parsable[Abstraction[?, ?]] with

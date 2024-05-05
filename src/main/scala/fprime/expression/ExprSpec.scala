@@ -1,14 +1,14 @@
-package fprime.language
+package fprime.expression
 
-import fprime.expression.Expression
 import fprime.parser.{Parser, given}
 import fprime.parsing.{Parsable, Tokens}
 
-trait Language extends Product1[Expression]
+/* Expression Specialization */
+trait ExprSpec extends Product1[Expression]
 
-given [T <: Language]: Conversion[T, Expression] = _._1
+given [T <: ExprSpec]: Conversion[T, Expression] = _._1
 
-given [T <: Language, E <: Expression](using
+given [T <: ExprSpec, E <: Expression](using
     downcast: Conversion[E, T],
     expression: Parsable[E],
 ): Parsable[T] with

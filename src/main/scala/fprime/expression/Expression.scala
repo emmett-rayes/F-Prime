@@ -8,16 +8,17 @@ import scala.util.Failure
 
 sealed trait Expression
 case class Variable(symbol: Symbol) extends Expression
-case class Abstraction[P, B](parameter: P, body: B) extends Expression
-case class Application[C, A](callable: C, argument: A) extends Expression
+case class Abstraction[P <: ExprSpec, B <: ExprSpec](parameter: P, body: B) extends Expression
+case class Application[C <: ExprSpec, A <: ExprSpec](callable: C, argument: A)
+    extends Expression
 
 given (using symbol: Parsable[Symbol]): Parsable[Variable] with
     override lazy val parser: Parser[Tokens, Variable] = symbol.parser.map(s => Variable(s))
 
-given [P, B <: Expression | Product1[Expression]](using
+given [P <: ExprSpec, B <: ExprSpec](using
     parameter: Parsable[P],
     body: Parsable[B],
-    upcast: Conversion[Abstraction[P, B], B & Product1[Expression]],
+    upcast: Conversion[Abstraction[P, B], B],
 ): Parsable[Abstraction[P, B]] with
     private val parameters = parameter.parser.atLeast(1).thenSkip(Literal.parser("."))
     private val lambda =
@@ -28,20 +29,17 @@ given [P, B <: Expression | Product1[Expression]](using
             .skipThen(parameters)
             .andThen(body.parser)
             .map((parameters, body) =>
-                val folded = parameters
+                parameters
                     .foldRight(body)((parameter: P, body: B) => Abstraction(parameter, body): B)
-                (folded match
-                    case product: Product1[?] => product._1
-                    case _                    => folded
-                )
-                .asInstanceOf[Abstraction[P, B]]
+                    ._1
+                    .asInstanceOf[Abstraction[P, B]]
                 // downcast safety: cannot fail because we've upcasted in the last folding step
             )
 
-given [C <: Expression | Product1[Expression], A](using
+given [C <: ExprSpec, A <: ExprSpec](using
     callable: Parsable[C],
     argument: Parsable[A],
-    upcast: Conversion[Application[C, A], C & Product1[Expression]],
+    upcast: Conversion[Application[C, A], C],
 ): Parsable[Application[C, A]] with
     private val parens = this.parser.between(Literal.parser("("), Literal.parser(")"))
 
@@ -49,12 +47,9 @@ given [C <: Expression | Product1[Expression], A](using
         callable.parser
             .andThen(argument.parser.atLeast(1))
             .map((head, tail) =>
-                val folded = tail
-                    .foldLeft(head)((callable, argument) => Application(callable, argument): C)
-                (folded match
-                    case product: Product1[?] => product._1
-                    case _                    => folded
-                ).asInstanceOf[Application[C, A]]
+                tail.foldLeft(head)((callable, argument) => Application(callable, argument): C)
+                    ._1
+                    .asInstanceOf[Application[C, A]]
                 // downcast safety: cannot fail because we've upcasted in the last folding step
             )
 
