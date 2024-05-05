@@ -4,7 +4,7 @@ import fprime.parser.combinators.map
 
 import scala.util.Try
 
-class ParseError(message: String) extends Exception(message)
+case class ParseError[Input](input: Input, message: String) extends Exception(message)
 
 type ParserResult[Input, Output] = Try[(Input, Output)]
 

@@ -66,7 +66,7 @@ given (using
     extension [T](self: Parser[Tokens, T])
         private def nonRecur(using tag: ClassTag[T]): Parser[Tokens, T] = (input: Tokens) =>
             if pending.isDefined && pending.get.equals(tag) then
-                Failure(ParseError("Left-recursion detected."))
+                Failure(ParseError(input, "Left-recursion detected."))
             else
                 val old = pending
                 pending = Some(tag)

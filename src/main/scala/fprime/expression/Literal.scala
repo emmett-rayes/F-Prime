@@ -14,7 +14,7 @@ object Literal:
         val trimmed = input.skipWhitespace
         Try {
             if !trimmed.startsWith(expected.asTokens) then
-                throw ParseError(s"Expected $expected at this position. ${trimmed.head}")
+                throw ParseError(input, s"Expected $expected at this position. ${trimmed.head}")
             val (matched, remaining) = trimmed.splitAt(expected.length)
             (remaining, matched.mkString)
         }

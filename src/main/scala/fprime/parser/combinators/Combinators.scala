@@ -2,6 +2,8 @@ package fprime.parser.combinators
 
 import fprime.parser.{ParseError, Parser}
 
+import scala.util.{Failure, Success, Try}
+
 extension [Input, Output](self: => Parser[Input, Output])
     def map[Mapped](f: Output => Mapped): Parser[Input, Mapped] =
         self.flatMap(output => Parser.unit(f(output)))
@@ -13,11 +15,18 @@ extension [Input, Output](self: => Parser[Input, Output])
         yield selfOutput :: otherOutputs
         greedy.orElse(Parser.unit(List()))
 
-    def atLeast(n: Int): Parser[Input, List[Output]] =
-        for outputs <- self.repeated
-        yield
-            if n <= outputs.size then outputs
-            else throw ParseError(s"Expected at least ${n - outputs.size} more elements.")
+    def atLeast(n: Int): Parser[Input, List[Output]] = input =>
+        Try {
+            self.repeated.parse(input) match
+                case Failure(exception) => println(exception); throw exception
+                case Success((remaining, outputs)) =>
+                    if n <= outputs.size then (remaining, outputs)
+                    else
+                        throw ParseError(
+                          remaining,
+                          s"Expected at least ${n - outputs.size} more element(s).",
+                        )
+        }
 
     def andThen[Then](other: => Parser[Input, Then]): Parser[Input, (Output, Then)] =
         for
