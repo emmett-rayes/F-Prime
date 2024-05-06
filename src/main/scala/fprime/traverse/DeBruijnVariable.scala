@@ -6,7 +6,7 @@ import scala.collection.mutable
 
 type DeBruijnIndex = Int
 
-class DeBruijnVariable(val index: DeBruijnIndex, symbol: Symbol) extends Variable(symbol)
+class DeBruijnVariable(var index: DeBruijnIndex, symbol: Symbol) extends Variable(symbol)
 
 object DeBruijnConverter:
     private class Context(
@@ -26,19 +26,19 @@ object DeBruijnConverter:
                         val scope = -context.numFreeVariables
                         scopes.push(scope)
                         scope
-                DeBruijnVariable(currentScope - bindingScope, symbol).asInstanceOf[E]
+                return DeBruijnVariable(currentScope - bindingScope, symbol).asInstanceOf[E]
 
             case abstraction @ Abstraction(parameter, body) =>
                 val scopes = context.variableScopes.getOrElseUpdate(parameter, mutable.Stack())
                 scopes.push(currentScope)
                 abstraction.body = convert(body, currentScope + 1)
                 scopes.pop()
-                abstraction
 
             case application @ Application(callable, argument) =>
                 application.callable = convert(callable, currentScope)
                 application.argument = convert(argument, currentScope)
-                application
+
+        expression
 
     def convert[E <: Expression](expression: E): E =
         given Context(0, mutable.Map())
