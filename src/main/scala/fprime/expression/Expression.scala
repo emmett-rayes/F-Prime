@@ -8,24 +8,13 @@ import scala.util.Failure
 
 sealed trait Expression
 
-class Variable(val symbol: Symbol) extends Expression
+case class Variable(var symbol: Symbol) extends Expression
 
-object Variable:
-    def unapply(variable: Variable): Tuple1[Symbol] = Tuple1(variable.symbol)
-
-class Abstraction[P <: Expression, B <: Expression](val parameter: P, val body: B)
+case class Abstraction[P <: Expression, B <: Expression](var parameter: P, var body: B)
     extends Expression
 
-object Abstraction:
-    def unapply[P <: Expression, B <: Expression](abstraction: Abstraction[P, B]): (P, B) =
-        (abstraction.parameter, abstraction.body)
-
-class Application[C <: Expression, A <: Expression](val callable: C, val argument: A)
+case class Application[C <: Expression, A <: Expression](var callable: C, var argument: A)
     extends Expression
-
-object Application:
-    def unapply[C <: Expression, A <: Expression](application: Application[C, A]): (C, A) =
-        (application.callable, application.argument)
 
 given [T <: Expression, E <: Expression](using
     downcast: Conversion[E, T & E],

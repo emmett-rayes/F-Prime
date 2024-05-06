@@ -12,17 +12,22 @@ private type UntypedApplicationInner = Application[UntypedLambda, UntypedLambda]
 
 type UntypedLambda = Expression & (UntypedVariable | UntypedAbstraction | UntypedApplication)
 
-case class UntypedVariable(override val symbol: Symbol) extends UntypedVariableInner(symbol)
+class UntypedVariable(symbol: Symbol) extends UntypedVariableInner(symbol)
 
-case class UntypedAbstraction(
-    override val parameter: UntypedVariable,
-    override val body: UntypedLambda,
-) extends UntypedAbstractionInner(parameter, body)
+object UntypedVariable:
+    def unapply(variable: UntypedVariable): UntypedVariableInner = variable
 
-case class UntypedApplication(
-    override val callable: UntypedLambda,
-    override val argument: UntypedLambda,
-) extends UntypedApplicationInner(callable, argument)
+class UntypedAbstraction(parameter: UntypedVariable, body: UntypedLambda)
+    extends UntypedAbstractionInner(parameter, body)
+
+object UntypedAbstraction:
+    def unapply(abstraction: UntypedAbstraction): UntypedAbstractionInner = abstraction
+
+class UntypedApplication(callable: UntypedLambda, argument: UntypedLambda)
+    extends UntypedApplicationInner(callable, argument)
+
+object UntypedApplication:
+    def unapply(application: UntypedApplication): UntypedApplicationInner = application
 
 private given Conversion[UntypedVariableInner, UntypedVariable] =
     variable => UntypedVariable(variable.symbol)
