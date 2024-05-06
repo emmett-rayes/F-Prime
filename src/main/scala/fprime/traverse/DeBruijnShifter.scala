@@ -9,15 +9,16 @@ object DeBruijnShifter:
                 variable match
                     case deBruijn: DeBruijnVariable =>
                         if deBruijn.index >= cutoff then deBruijn.index += place
-                    case _ =>
+                        deBruijn
+                    case _ => variable
 
             case abstraction @ Abstraction(parameter, body) =>
                 abstraction.body = shift(body, place, cutoff + 1)
+                abstraction
 
             case application @ Application(callable, argument) =>
                 application.callable = shift(callable, place, cutoff)
                 application.argument = shift(argument, place, cutoff)
-
-        expression
+                application
 
     def shift[E <: Expression](expression: E, place: Int): E = shift(expression, place, 1)

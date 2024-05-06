@@ -26,19 +26,19 @@ object DeBruijnConverter:
                         val scope = -context.numFreeVariables
                         scopes.push(scope)
                         scope
-                return DeBruijnVariable(currentScope - bindingScope, symbol).asInstanceOf[E]
+                DeBruijnVariable(currentScope - bindingScope, symbol).asInstanceOf[E]
 
             case abstraction @ Abstraction(parameter, body) =>
                 val scopes = context.variableScopes.getOrElseUpdate(parameter, mutable.Stack())
                 scopes.push(currentScope)
                 abstraction.body = convert(body, currentScope + 1)
                 scopes.pop()
+                abstraction
 
             case application @ Application(callable, argument) =>
                 application.callable = convert(callable, currentScope)
                 application.argument = convert(argument, currentScope)
-
-        expression
+                application
 
     def convert[E <: Expression](expression: E): E =
         given Context(0, mutable.Map())
