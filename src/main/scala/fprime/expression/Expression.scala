@@ -68,17 +68,32 @@ given (using
     import scala.reflect.ClassTag
 
     private val parens = this.parser.between(Literal.parser("("), Literal.parser(")"))
-    private var pending: Option[ClassTag[?]] = None
+    private var pending: Option[(Int, ClassTag[?])] = None
+    private var level = 0
+
+    extension (tag: ClassTag[?])
+        def name: String =
+            val string = tag.toString()
+            val components = string.split('.')
+            if components.isEmpty then tag.toString() else components.last
 
     extension [T](self: Parser[Tokens, T])
         private def nonRecur(using tag: ClassTag[T]): Parser[Tokens, T] = (input: Tokens) =>
-            if pending.isDefined && pending.get.equals(tag) then
-                Failure(ParseError(input, "Left-recursion detected."))
+            /*
+            println(
+              "\t" * level + s"pending ${pending.map(_._2.name)} - parsing ${tag.name} on $input"
+            )
+            */
+            if pending.isDefined && pending.get._1 == input.size && pending.get._2.equals(tag)
+            then Failure(ParseError(input, "Left-recursion detected."))
             else
                 val old = pending
-                pending = Some(tag)
+                pending = Some((input.size, tag))
+                level += 1
                 val result = self.parse(input)
-                pending = old
+                pending =
+                    old.map((size, oldTag) => (result.map(_._1.size).getOrElse(size), oldTag))
+                level -= 1
                 result
 
     override lazy val parser: Parser[Tokens, Expression] =
