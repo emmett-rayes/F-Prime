@@ -19,7 +19,7 @@ object DeBruijnConverter:
         expression match
             case variable @ Variable(symbol) =>
                 val scopes = context.variableScopes.getOrElseUpdate(variable, mutable.Stack())
-                val bindingScope = scopes.popOption() match
+                val bindingScope = scopes.topOption() match
                     case Some(scope) => scope
                     case None =>
                         context.numFreeVariables += 1
@@ -45,4 +45,4 @@ object DeBruijnConverter:
         convert(expression, 0)
 
 extension [T](stack: mutable.Stack[T])
-    def popOption(): Option[T] = if stack.isEmpty then None else Some(stack.pop())
+    def topOption(): Option[T] = if stack.isEmpty then None else Some(stack.top)
