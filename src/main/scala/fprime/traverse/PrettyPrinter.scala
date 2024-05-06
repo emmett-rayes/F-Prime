@@ -46,4 +46,6 @@ object PrettyPrinter:
 
     def pretty(expression: Expression, mode: Mode = Mode.Named): String =
         given Mode = mode
-        pretty(expression, 0)
+        val expressionIsAbstraction = cond(expression) { case Abstraction(_, _) => true }
+        val string = pretty(expression, 0)
+        if expressionIsAbstraction then string.stripPrefix("(").stripSuffix(")") else string
