@@ -11,7 +11,7 @@ object PrettyPrinter:
         case Indexed
         case NamelessLocals
 
-    private def pretty(expression: Expression, scope: Int)(using mode: Mode): String =
+    private def pretty[E <: Expression](expression: E, scope: Int)(using mode: Mode): String =
         expression match
             case variable @ Variable(symbol) =>
                 mode match
@@ -44,7 +44,7 @@ object PrettyPrinter:
                 if argumentIsApplication then prettyArgument = s"($prettyArgument)"
                 s"$prettyCallable $prettyArgument"
 
-    def pretty(expression: Expression, mode: Mode = Mode.Named): String =
+    def pretty[E <: Expression](expression: E, mode: Mode = Mode.Named): String =
         given Mode = mode
         val expressionIsAbstraction = cond(expression) { case Abstraction(_, _) => true }
         val string = pretty(expression, 0)
