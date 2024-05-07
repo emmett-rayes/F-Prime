@@ -3,7 +3,7 @@ package fprime.traverse
 import fprime.expression.{Abstraction, Application, Expression, Variable}
 
 object DeBruijnShifter:
-    private def shift[E <: Expression](expression: E, place: Int, cutoff: Int): E =
+    private def traverse(expression: Expression, place: Int, cutoff: Int): Expression =
         expression match
             case variable @ Variable(_) =>
                 variable match
@@ -13,12 +13,13 @@ object DeBruijnShifter:
                     case _ => variable
 
             case abstraction @ Abstraction(parameter, body) =>
-                abstraction.body = shift(body, place, cutoff + 1)
-                abstraction
+                val b = traverse(body, place, cutoff + 1)
+                abstraction.copy(body = b)
 
             case application @ Application(callable, argument) =>
-                application.callable = shift(callable, place, cutoff)
-                application.argument = shift(argument, place, cutoff)
-                application
+                val c = traverse(callable, place, cutoff)
+                val a = traverse(argument, place, cutoff)
+                application.copy(callable = c, argument = a)
 
-    def shift[E <: Expression](expression: E, place: Int): E = shift(expression, place, 1)
+    def shift[E <: Expression](expression: E, place: Int): E =
+        traverse(expression, place, 1).asInstanceOf[E]

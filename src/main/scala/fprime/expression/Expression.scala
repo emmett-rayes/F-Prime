@@ -8,12 +8,12 @@ import scala.util.Failure
 
 sealed trait Expression
 
-case class Variable(var symbol: Symbol) extends Expression
+case class Variable(symbol: Symbol) extends Expression
 
-case class Abstraction[P <: Expression, B <: Expression](var parameter: P, var body: B)
+case class Abstraction[P <: Expression, B <: Expression](parameter: P, body: B)
     extends Expression
 
-case class Application[C <: Expression, A <: Expression](var callable: C, var argument: A)
+case class Application[C <: Expression, A <: Expression](callable: C, argument: A)
     extends Expression
 
 given [T <: Expression, E <: Expression](using

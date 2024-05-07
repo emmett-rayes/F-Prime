@@ -3,8 +3,11 @@ package fprime.traverse
 import fprime.expression.{Abstraction, Application, Expression, Variable}
 
 object DeBruijnSubstitution:
-    // TODO: find a better solution than casting
-    def substitute[E <: Expression, R <: E](expression: E, target: Int, replacement: R): E =
+    private def traverse(
+        expression: Expression,
+        target: Int,
+        replacement: Expression,
+    ): Expression =
         expression match
             case variable @ Variable(_) =>
                 variable match
@@ -12,20 +15,18 @@ object DeBruijnSubstitution:
                     case _                                                      => variable
 
             case abstraction @ Abstraction(parameter, body) =>
-                val shifted = DeBruijnShifter.shift(replacement, 1)
-                abstraction.body =
-                    substitute(abstraction.body, target + 1, shifted.asInstanceOf[body.type])
-                abstraction
+                DeBruijnShifter.shift(replacement, 1)
+                val b = traverse(abstraction.body, target + 1, replacement)
+                abstraction.copy(body = b)
 
             case application @ Application(callable, argument) =>
-                application.callable = substitute(
-                  application.callable,
-                  target,
-                  replacement.asInstanceOf[callable.type],
-                )
-                application.argument = substitute(
-                  application.argument,
-                  target,
-                  replacement.asInstanceOf[argument.type],
-                )
-                application
+                val c = traverse(application.callable, target, replacement)
+                val a = traverse(application.argument, target, replacement)
+                application.copy(callable = c, argument = a)
+
+    def substitute[E <: Expression & L, R <: Expression & L, L <: Expression](
+        expression: E,
+        target: Int,
+        replacement: R,
+    ): L =
+        traverse(expression, target, replacement).asInstanceOf[L]

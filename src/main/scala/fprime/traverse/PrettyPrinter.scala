@@ -11,7 +11,7 @@ object PrettyPrinter:
         case Indexed
         case NamelessLocals
 
-    private def pretty[E <: Expression](expression: E, scope: Int)(using mode: Mode): String =
+    private def traverse(expression: Expression, scope: Int)(using mode: Mode): String =
         expression match
             case variable @ Variable(symbol) =>
                 mode match
@@ -29,8 +29,8 @@ object PrettyPrinter:
 
             case Abstraction(parameter, body) =>
                 val bodyIsAbstraction = cond(body) { case Abstraction(_, _) => true }
-                val prettyParameter = pretty(parameter, scope)
-                var prettyBody = pretty(body, scope)
+                val prettyParameter = traverse(parameter, scope)
+                var prettyBody = traverse(body, scope)
                 if bodyIsAbstraction then
                     prettyBody = prettyBody.stripPrefix("(").stripSuffix(")")
                 mode match
@@ -39,13 +39,13 @@ object PrettyPrinter:
 
             case Application(callable, argument) =>
                 val argumentIsApplication = cond(argument) { case Application(_, _) => true }
-                val prettyCallable = pretty(callable, scope)
-                var prettyArgument = pretty(argument, scope)
+                val prettyCallable = traverse(callable, scope)
+                var prettyArgument = traverse(argument, scope)
                 if argumentIsApplication then prettyArgument = s"($prettyArgument)"
                 s"$prettyCallable $prettyArgument"
 
     def pretty[E <: Expression](expression: E, mode: Mode = Mode.Named): String =
         given Mode = mode
         val expressionIsAbstraction = cond(expression) { case Abstraction(_, _) => true }
-        val string = pretty(expression, 0)
+        val string = traverse(expression, 0)
         if expressionIsAbstraction then string.stripPrefix("(").stripSuffix(")") else string

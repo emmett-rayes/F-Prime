@@ -13,9 +13,10 @@ object DeBruijnConverter:
         var numFreeVariables: Int,
         val variableScopes: mutable.Map[Expression, mutable.Stack[Int]],
     )
-    private def convert[E <: Expression](expression: E, currentScope: Int)(using
+
+    private def traverse(expression: Expression, currentScope: Int)(using
         context: Context
-    ): E =
+    ): Expression =
         expression match
             case variable @ Variable(symbol) =>
                 val scopes = context.variableScopes.getOrElseUpdate(variable, mutable.Stack())
@@ -26,23 +27,23 @@ object DeBruijnConverter:
                         val scope = -context.numFreeVariables
                         scopes.push(scope)
                         scope
-                DeBruijnVariable(currentScope - bindingScope, symbol).asInstanceOf[E]
+                DeBruijnVariable(currentScope - bindingScope, symbol)
 
             case abstraction @ Abstraction(parameter, body) =>
                 val scopes = context.variableScopes.getOrElseUpdate(parameter, mutable.Stack())
                 scopes.push(currentScope)
-                abstraction.body = convert(body, currentScope + 1)
+                val b = traverse(body, currentScope + 1)
                 scopes.pop()
-                abstraction
+                abstraction.copy(body = b)
 
             case application @ Application(callable, argument) =>
-                application.callable = convert(callable, currentScope)
-                application.argument = convert(argument, currentScope)
-                application
+                val c = traverse(callable, currentScope)
+                val a = traverse(argument, currentScope)
+                application.copy(callable = c, argument = a)
 
     def convert[E <: Expression](expression: E): E =
         given Context(0, mutable.Map())
-        convert(expression, 0)
+        traverse(expression, 0).asInstanceOf[E]
 
 extension [T](stack: mutable.Stack[T])
     def topOption(): Option[T] = if stack.isEmpty then None else Some(stack.top)
