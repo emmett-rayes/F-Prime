@@ -38,7 +38,7 @@ private given Conversion[UntypedAbstractionInner, UntypedAbstraction] =
 private given Conversion[UntypedApplicationInner, UntypedApplication] =
     application => UntypedApplication(application.callable, application.argument)
 
-given Parsable[UntypedLambda] with
+given UntypedLambdaParser: Parsable[UntypedLambda] with
     private given Parsable[Abstraction[?, ?]] with
         override lazy val parser: Parser[Tokens, Abstraction[?, ?]] =
             summonParser[UntypedAbstraction].map(_.asInstanceOf[Abstraction[?, ?]])

@@ -16,16 +16,16 @@ case class Abstraction[P <: Expression, B <: Expression](parameter: P, body: B)
 case class Application[C <: Expression, A <: Expression](callable: C, argument: A)
     extends Expression
 
-given [T <: Expression, E <: Expression](using
+given AutoParser[T <: Expression, E <: Expression](using
     downcast: Conversion[E, T & E],
     expression: Parsable[E],
 ): Parsable[T] with
     override lazy val parser: Parser[Tokens, T] = expression.parser.map(identity)
 
-given (using symbol: Parsable[Symbol]): Parsable[Variable] with
+given VariableParser(using symbol: Parsable[Symbol]): Parsable[Variable] with
     override lazy val parser: Parser[Tokens, Variable] = symbol.parser.map(s => Variable(s))
 
-given [P <: Expression, B <: Expression](using
+given AbstractionParser[P <: Expression, B <: Expression](using
     parameter: Parsable[P],
     body: Parsable[B],
     downcast: Conversion[Abstraction[P, B], B & Abstraction[P, B]], // shape preserving
@@ -45,7 +45,7 @@ given [P <: Expression, B <: Expression](using
                 // downcast safety: cannot fail because we've upcasted in the last folding step
             )
 
-given [C <: Expression, A <: Expression](using
+given ApplicationParser[C <: Expression, A <: Expression](using
     callable: Parsable[C],
     argument: Parsable[A],
     downcast: Conversion[Application[C, A], C & Application[C, A]], // shape preserving
@@ -60,7 +60,7 @@ given [C <: Expression, A <: Expression](using
                     .asInstanceOf[Application[C, A]]
             )
 
-given (using
+given ExpressionParser(using
     variable: Parsable[Variable],
     abstraction: Parsable[Abstraction[?, ?]],
     application: Parsable[Application[?, ?]],
@@ -83,7 +83,7 @@ given (using
             println(
               "\t" * level + s"pending ${pending.map(_._2.name)} - parsing ${tag.name} on $input"
             )
-            */
+             */
             if pending.isDefined && pending.get._1 == input.size && pending.get._2.equals(tag)
             then Failure(ParseError(input, "Left-recursion detected."))
             else

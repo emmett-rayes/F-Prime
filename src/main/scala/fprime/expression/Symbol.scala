@@ -7,7 +7,7 @@ import scala.util.Try
 
 type Symbol = String
 
-given Parsable[Symbol] with
+given SymbolParser: Parsable[Symbol] with
     override lazy val parser: Parser[Tokens, Symbol] = (input: Tokens) =>
         val trimmed = input.skipWhitespace
         Try {
