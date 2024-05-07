@@ -1,7 +1,7 @@
 package fprime.expression
 
 import fprime.parser.{ParseError, Parser}
-import fprime.parsing.*
+import fprime.parsing.{Parsable, Tokens, skipWhitespace, splitAfter}
 
 import scala.util.Try
 
@@ -18,3 +18,9 @@ given SymbolParser: Parsable[Symbol] with
                 trimmed.splitAfter(t => t.isAsciiLetterOrDigit || t == '-' || t == '_')
             (remaining, matched.mkString)
         }
+
+extension (c: Char)
+    def isAsciiLetter: Boolean =
+        c.isLetter && (('A' <= c && c <= 'z') || ('a' <= c && c <= 'z'))
+
+    def isAsciiLetterOrDigit: Boolean = c.isDigit || c.isAsciiLetter

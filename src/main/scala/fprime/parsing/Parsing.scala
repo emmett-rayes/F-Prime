@@ -14,12 +14,6 @@ extension (string: String) def asTokens: Tokens = string
 
 extension (tokens: Tokens) def skipWhitespace: Tokens = tokens.splitAfter(_.isWhitespace)._2
 
-extension (c: Char)
-    def isAsciiLetter: Boolean =
-        c.isLetter && (('A' <= c && c <= 'z') || ('a' <= c && c <= 'z'))
-
-    def isAsciiLetterOrDigit: Boolean = c.isDigit || c.isAsciiLetter
-
 extension [A](seq: IndexedSeq[A])
     def splitAfter(p: A => Boolean): (IndexedSeq[A], IndexedSeq[A]) =
         val index = seq.indexWhere(!p(_))
