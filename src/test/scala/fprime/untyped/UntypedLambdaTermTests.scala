@@ -1,16 +1,10 @@
 package fprime.untyped
 
-import fprime.parsing.{asTokens, summonParser}
+import fprime.util.parseTerm
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.{matchPattern, should}
 
 class UntypedLambdaTermTests extends AnyFunSuite:
-    private def parseTerm(string: String): UntypedLambda =
-        val input = string.asTokens
-        val (remaining, output) = summonParser[UntypedLambda].parse(input).get
-        assert(remaining.isEmpty, s"Input was not fully parsed. Remaining: ${remaining}")
-        output
-
     test("variable") {
         val term = parseTerm("x")
         term should matchPattern { case UntypedVariable(symbol) if symbol == "x" => }

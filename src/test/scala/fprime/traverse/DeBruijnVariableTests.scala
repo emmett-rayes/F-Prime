@@ -1,17 +1,10 @@
 package fprime.traverse
 
-import fprime.parsing.{asTokens, summonParser}
-import fprime.untyped.{UntypedLambda, given}
+import fprime.util.parseTerm
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.{matchPattern, should}
 
 class DeBruijnVariableTests extends AnyFunSuite:
-    private def parseTerm(string: String): UntypedLambda =
-        val input = string.asTokens
-        val (remaining, output) = summonParser[UntypedLambda].parse(input).get
-        assert(remaining.isEmpty, s"Input was not fully parsed. Remaining: ${remaining}")
-        output
-
     test("free variables") {
         val term = parseTerm("a b c")
         val converted = DeBruijnConverter.convert(term)
