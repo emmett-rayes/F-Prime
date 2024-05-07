@@ -30,7 +30,7 @@ object PrettyPrinter:
             case Abstraction(parameter, body) =>
                 val bodyIsAbstraction = cond(body) { case Abstraction(_, _) => true }
                 val prettyParameter = traverse(parameter, scope)
-                var prettyBody = traverse(body, scope)
+                var prettyBody = traverse(body, scope + 1)
                 if bodyIsAbstraction then
                     prettyBody = prettyBody.stripPrefix("(").stripSuffix(")")
                 mode match
