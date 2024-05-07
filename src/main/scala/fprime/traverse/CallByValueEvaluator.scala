@@ -1,29 +1,10 @@
 package fprime.traverse
 
+import fprime.eval.BetaReduction
 import fprime.expression.{Abstraction, Application, Expression, Variable}
 
 import scala.PartialFunction.cond
 import scala.util.control.Breaks.*
-
-trait BetaReduction:
-    def reduceOnce[E <: Expression & R, R <: Expression](
-        expression: E,
-        normalize: Boolean = false,
-    ): Option[R]
-
-    def reduce[E <: Expression & R, R <: Expression](
-        expression: E,
-        normalize: Boolean = false,
-    ): Option[R] =
-        var reduced = false
-        var result = expression
-        while true do
-            reduceOnce(result, normalize) match
-                case None => return if reduced then Some(result) else None
-                case Some(r) =>
-                    reduced = true
-                    result = r
-        throw RuntimeException("unreachable!")
 
 object CallByValueEvaluator extends BetaReduction:
     override def reduceOnce[E <: Expression & R, R <: Expression](
