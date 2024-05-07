@@ -1,18 +1,18 @@
 package fprime.traverse
 
-import fprime.eval.BetaReduction
+import fprime.eval.{BetaReduction, TracingBetaReduction}
 import fprime.expression.{Abstraction, Application, Expression, Variable}
 
 import scala.PartialFunction.cond
 import scala.util.control.Breaks.*
 
-object CallByValueEvaluator extends BetaReduction:
-    override def reduceOnce[E <: Expression & R, R <: Expression](
+object CallByValueEvaluator extends BetaReduction with TracingBetaReduction:
+    override def reduceOnce[E <: Expression](
         expression: E,
         normalize: Boolean = false,
-    ): Option[R] =
+    ): Option[E] =
         given Boolean = normalize
-        traverse(expression).map(x => x.asInstanceOf[R])
+        traverse(expression).map(x => x.asInstanceOf[E])
 
     private def traverse(expression: Expression)(using normalize: Boolean): Option[Expression] =
         expression match

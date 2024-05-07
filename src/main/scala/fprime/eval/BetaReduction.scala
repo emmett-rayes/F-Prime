@@ -3,15 +3,15 @@ package fprime.eval
 import fprime.expression.Expression
 
 trait BetaReduction:
-    def reduceOnce[E <: Expression & R, R <: Expression](
+    def reduceOnce[E <: Expression](
         expression: E,
         normalize: Boolean = false,
-    ): Option[R]
+    ): Option[E]
 
-    def reduce[E <: Expression & R, R <: Expression](
+    def reduce[E <: Expression](
         expression: E,
         normalize: Boolean = false,
-    ): Option[R] =
+    ): Option[E] =
         var strict = false
         var current = expression
         while true do

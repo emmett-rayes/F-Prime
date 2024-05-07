@@ -24,9 +24,9 @@ object DeBruijnSubstitution:
                 val a = traverse(application.argument, target, replacement)
                 application.copy(callable = c, argument = a)
 
-    def substitute[E <: Expression & L, R <: Expression & L, L <: Expression](
+    def substitute[E <: Expression, R <: E](
         expression: E,
         target: Int,
         replacement: R,
-    ): L =
-        traverse(expression, target, replacement).asInstanceOf[L]
+    ): E =
+        traverse(expression, target, replacement).asInstanceOf[E]

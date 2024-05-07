@@ -7,11 +7,11 @@ import scala.collection.mutable.ArrayBuffer
 trait TracingBetaReduction:
     this: BetaReduction =>
 
-    def trace[E <: Expression & R, R <: Expression](
+    def trace[E <: Expression](
         expression: E,
         normalize: Boolean = false,
-    ): List[R] =
-        val trace = ArrayBuffer[R]()
+    ): List[E] =
+        val trace = ArrayBuffer[E]()
         var current = expression
         while true do
             trace.append(current)
