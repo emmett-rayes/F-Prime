@@ -27,14 +27,12 @@ object CallByValueEvaluator extends BetaReduction with TracingBetaReduction:
                         case Some(b) => Some(abstraction.copy(body = b))
 
             case application @ Application(callable, argument) =>
-                if !normalize && callable.isValue then return None
-                else
+                if normalize || !callable.isValue then
                     traverse(callable) match
                         case None    =>
                         case Some(c) => return Some(application.copy(callable = c))
 
-                if !normalize && argument.isValue then return None
-                else
+                if normalize || !argument.isValue then
                     traverse(argument) match
                         case None    =>
                         case Some(a) => return Some(application.copy(argument = a))
