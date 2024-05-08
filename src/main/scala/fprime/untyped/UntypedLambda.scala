@@ -5,7 +5,6 @@ import fprime.parser.Parser
 import fprime.parser.combinators.map
 import fprime.parsing.{Parsable, Tokens, summonParser}
 
-private given [A <: B, B]: Conversion[A, B] = identity
 private type UntypedVariableInner = Variable
 private type UntypedAbstractionInner = Abstraction[UntypedVariable, UntypedLambda]
 private type UntypedApplicationInner = Application[UntypedLambda, UntypedLambda]
