@@ -42,6 +42,7 @@ object CallByValueEvaluator extends BetaReduction:
                         val substituted =
                             DeBruijnSubstitution.substitute(body, target = 1, shiftedArgument)
                         val shiftedBody = DeBruijnShifter.shift(substituted, -1)
+                        // noinspection ScalaRedundantCast
                         Some(shiftedBody.asInstanceOf[E])
                     case _ => None
 
