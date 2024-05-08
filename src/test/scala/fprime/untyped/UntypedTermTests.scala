@@ -4,7 +4,7 @@ import fprime.util.parseTerm
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.{matchPattern, should}
 
-class UntypedLambdaTermTests extends AnyFunSuite:
+class UntypedTermTests extends AnyFunSuite:
     test("variable") {
         val term = parseTerm("x")
         term should matchPattern { case UntypedVariable(symbol, _) if symbol == "x" => }

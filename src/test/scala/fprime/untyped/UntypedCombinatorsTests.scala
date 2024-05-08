@@ -5,7 +5,7 @@ import fprime.util.parseTerm
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.{matchPattern, should}
 
-class UntypedLambdaCombinatorsTests extends AnyFunSuite:
+class UntypedCombinatorsTests extends AnyFunSuite:
     private def process(input: String): String =
         val term = parseTerm(input)
         val converted = DeBruijnConverter.convert(term)

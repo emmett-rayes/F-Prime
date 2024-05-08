@@ -3,7 +3,7 @@ package fprime.repl
 import fprime.parser.result
 import fprime.parsing.summonParser
 import fprime.traverse.{CallByValueEvaluator, DeBruijnConverter, PrettyPrinter}
-import fprime.untyped.{UntypedLambda, UntypedLambdaParser}
+import fprime.untyped.{UntypedTerm, UntypedTermParser}
 
 import scala.io.StdIn.readLine
 import scala.util.{Failure, Success}
@@ -19,7 +19,7 @@ def repl(): Nothing =
     while true do
         val input = prompt()
 
-        val parser = summonParser[UntypedLambda]
+        val parser = summonParser[UntypedTerm]
         val trace = for
             term <- parser.parse(input).result
             pretty = PrettyPrinter.pretty(term)

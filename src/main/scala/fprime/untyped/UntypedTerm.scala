@@ -6,23 +6,23 @@ import fprime.parser.combinators.map
 import fprime.parsing.{Parsable, Tokens, summonParser}
 
 private type UntypedVariableInner = Variable
-private type UntypedAbstractionInner = Abstraction[UntypedVariable, UntypedLambda]
-private type UntypedApplicationInner = Application[UntypedLambda, UntypedLambda]
+private type UntypedAbstractionInner = Abstraction[UntypedVariable, UntypedTerm]
+private type UntypedApplicationInner = Application[UntypedTerm, UntypedTerm]
 
-type UntypedLambda = Expression & (UntypedVariable | UntypedAbstraction | UntypedApplication)
+type UntypedTerm = Expression & (UntypedVariable | UntypedAbstraction | UntypedApplication)
 
 class UntypedVariable(symbol: Symbol) extends UntypedVariableInner(symbol)
 
 object UntypedVariable:
     def unapply(variable: UntypedVariable): UntypedVariableInner = variable
 
-class UntypedAbstraction(parameter: UntypedVariable, body: UntypedLambda)
+class UntypedAbstraction(parameter: UntypedVariable, body: UntypedTerm)
     extends UntypedAbstractionInner(parameter, body)
 
 object UntypedAbstraction:
     def unapply(abstraction: UntypedAbstraction): UntypedAbstractionInner = abstraction
 
-class UntypedApplication(callable: UntypedLambda, argument: UntypedLambda)
+class UntypedApplication(callable: UntypedTerm, argument: UntypedTerm)
     extends UntypedApplicationInner(callable, argument)
 
 object UntypedApplication:
@@ -37,7 +37,7 @@ private given Conversion[UntypedAbstractionInner, UntypedAbstraction] =
 private given Conversion[UntypedApplicationInner, UntypedApplication] =
     application => UntypedApplication(application.callable, application.argument)
 
-given UntypedLambdaParser: Parsable[UntypedLambda] with
+given UntypedTermParser: Parsable[UntypedTerm] with
     private given Parsable[Abstraction[?, ?]] with
         override lazy val parser: Parser[Tokens, Abstraction[?, ?]] =
             summonParser[UntypedAbstraction].map(_.asInstanceOf[Abstraction[?, ?]])
@@ -46,7 +46,7 @@ given UntypedLambdaParser: Parsable[UntypedLambda] with
         override lazy val parser: Parser[Tokens, Application[?, ?]] =
             summonParser[UntypedApplication].map(_.asInstanceOf[Application[?, ?]])
 
-    override lazy val parser: Parser[Tokens, UntypedLambda] =
+    override lazy val parser: Parser[Tokens, UntypedTerm] =
         // cast safety: the correct parser was supplied by the local given
         summonParser[Expression].map {
             case e: UntypedVariableInner               => e
