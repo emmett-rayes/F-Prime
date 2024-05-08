@@ -8,7 +8,7 @@ class CallByValueEvaluatorTests extends AnyFunSuite:
     test("full beta") {
         val term = parseTerm("(λn.λs.λz.s (n s z)) (λs.λz.z)")
         val converted = DeBruijnConverter.convert(term)
-        val reduced = CallByValueEvaluator.reduce(converted, normalize = true).get
+        val reduced = CallByValueEvaluator.reduce(converted, normalize = true).last
         val pretty = PrettyPrinter.pretty(reduced, mode = PrettyPrinter.Mode.Named)
         assert(pretty == "λs. λz. s z")
     }

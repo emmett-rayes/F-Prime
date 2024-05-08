@@ -24,7 +24,7 @@ def repl(): Nothing =
             term <- parser.parse(input).result
             pretty = PrettyPrinter.pretty(term)
             converted = DeBruijnConverter.convert(term)
-        yield CallByValueEvaluator.trace(converted, normalize = true)
+        yield CallByValueEvaluator.reduce(converted, normalize = true)
 
         trace match
             case Failure(exception) => error()

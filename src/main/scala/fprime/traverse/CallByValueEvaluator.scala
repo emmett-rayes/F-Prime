@@ -1,12 +1,12 @@
 package fprime.traverse
 
-import fprime.eval.{BetaReduction, TracingBetaReduction}
+import fprime.eval.BetaReduction
 import fprime.expression.{Abstraction, Application, Expression, Variable}
 
 import scala.PartialFunction.cond
 import scala.util.control.Breaks.*
 
-object CallByValueEvaluator extends BetaReduction with TracingBetaReduction:
+object CallByValueEvaluator extends BetaReduction:
     override def reduceOnce[E <: Expression](
         expression: E,
         normalize: Boolean = false,

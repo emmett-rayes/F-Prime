@@ -2,6 +2,8 @@ package fprime.eval
 
 import fprime.expression.Expression
 
+import scala.collection.mutable.ArrayBuffer
+
 trait BetaReduction:
     def reduceOnce[E <: Expression](
         expression: E,
@@ -11,13 +13,12 @@ trait BetaReduction:
     def reduce[E <: Expression](
         expression: E,
         normalize: Boolean = false,
-    ): Option[E] =
-        var strict = false
+    ): List[E] =
+        val trace = ArrayBuffer[E]()
         var current = expression
         while true do
+            trace.append(current)
             reduceOnce(current, normalize) match
-                case None => return if strict then Some(current) else None
-                case Some(reduced) =>
-                    strict = true
-                    current = reduced
+                case None => return trace.toList
+                case Some(reduced) => current = reduced
         throw RuntimeException("unreachable!")
