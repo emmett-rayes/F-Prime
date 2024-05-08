@@ -19,6 +19,6 @@ trait BetaReduction:
         while true do
             trace.append(current)
             reduceOnce(current, normalize) match
-                case None => return trace.toList
+                case None          => return trace.toList
                 case Some(reduced) => current = reduced
         throw RuntimeException("unreachable!")
