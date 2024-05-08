@@ -1,12 +1,8 @@
 package fprime.traverse
 
-import fprime.expression.{Abstraction, Application, Expression, Symbol, Variable}
+import fprime.expression.*
 
 import scala.collection.mutable
-
-type DeBruijnIndex = Int
-
-class DeBruijnVariable(var index: DeBruijnIndex, symbol: Symbol) extends Variable(symbol)
 
 object DeBruijnConverter:
     private class Context(
@@ -14,11 +10,11 @@ object DeBruijnConverter:
         val variableScopes: mutable.Map[Expression, mutable.Stack[Int]],
     )
 
-    private def traverse(expression: Expression, currentScope: Int)(using
+    private def traverse[E <: Expression](expression: E, currentScope: Int)(using
         context: Context
-    ): Expression =
+    ): E =
         expression match
-            case variable @ Variable(symbol) =>
+            case variable @ Variable(symbol, index) =>
                 val scopes = context.variableScopes.getOrElseUpdate(variable, mutable.Stack())
                 val bindingScope = scopes.topOption() match
                     case Some(scope) => scope
@@ -27,23 +23,23 @@ object DeBruijnConverter:
                         val scope = -context.numFreeVariables
                         scopes.push(scope)
                         scope
-                DeBruijnVariable(currentScope - bindingScope, symbol)
+                variable.copy(index = currentScope - bindingScope).asInstanceOf[variable.type]
 
             case abstraction @ Abstraction(parameter, body) =>
                 val scopes = context.variableScopes.getOrElseUpdate(parameter, mutable.Stack())
                 scopes.push(currentScope)
                 val b = traverse(body, currentScope + 1)
                 scopes.pop()
-                abstraction.copy(body = b)
+                abstraction.copy(body = b).asInstanceOf[abstraction.type]
 
             case application @ Application(callable, argument) =>
                 val c = traverse(callable, currentScope)
                 val a = traverse(argument, currentScope)
-                application.copy(callable = c, argument = a)
+                application.copy(callable = c, argument = a).asInstanceOf[application.type]
 
     def convert[E <: Expression](expression: E): E =
         given Context(0, mutable.Map())
-        traverse(expression, 0).asInstanceOf[E]
+        traverse(expression, 0)
 
 extension [T](stack: mutable.Stack[T])
     def topOption(): Option[T] = if stack.isEmpty then None else Some(stack.top)

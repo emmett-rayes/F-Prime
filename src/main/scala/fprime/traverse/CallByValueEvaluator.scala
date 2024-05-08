@@ -4,17 +4,9 @@ import fprime.eval.BetaReduction
 import fprime.expression.{Abstraction, Application, Expression, Variable}
 
 import scala.PartialFunction.cond
-import scala.util.control.Breaks.*
 
 object CallByValueEvaluator extends BetaReduction:
-    override def reduceOnce[E <: Expression](
-        expression: E,
-        normalize: Boolean = false,
-    ): Option[E] =
-        given Boolean = normalize
-        traverse(expression).map(x => x.asInstanceOf[E])
-
-    private def traverse(expression: Expression)(using normalize: Boolean): Option[Expression] =
+    private def traverse[E <: Expression](expression: E)(using normalize: Boolean): Option[E] =
         expression match
             case _: Variable =>
                 None
@@ -23,19 +15,26 @@ object CallByValueEvaluator extends BetaReduction:
                 if !normalize then None
                 else
                     traverse(body) match
-                        case None    => None
-                        case Some(b) => Some(abstraction.copy(body = b))
+                        case None => None
+                        case Some(b) =>
+                            Some(abstraction.copy(body = b).asInstanceOf[abstraction.type])
 
             case application @ Application(callable, argument) =>
                 if normalize || !callable.isValue then
                     traverse(callable) match
-                        case None    =>
-                        case Some(c) => return Some(application.copy(callable = c))
+                        case None =>
+                        case Some(c) =>
+                            return Some(
+                              application.copy(callable = c).asInstanceOf[application.type]
+                            )
 
                 if normalize || !argument.isValue then
                     traverse(argument) match
-                        case None    =>
-                        case Some(a) => return Some(application.copy(argument = a))
+                        case None =>
+                        case Some(a) =>
+                            return Some(
+                              application.copy(argument = a).asInstanceOf[application.type]
+                            )
 
                 callable match
                     case Abstraction(parameter, body) =>
@@ -43,8 +42,15 @@ object CallByValueEvaluator extends BetaReduction:
                         val substituted =
                             DeBruijnSubstitution.substitute(body, target = 1, shiftedArgument)
                         val shiftedBody = DeBruijnShifter.shift(substituted, -1)
-                        Some(shiftedBody)
+                        Some(shiftedBody.asInstanceOf[E])
                     case _ => None
+
+    override def reduceOnce[E <: Expression](
+        expression: E,
+        normalize: Boolean = false,
+    ): Option[E] =
+        given Boolean = normalize
+        traverse(expression)
 
 extension (expression: Expression)
     def isValue: Boolean = cond(expression) { case _: Abstraction[?, ?] => true }

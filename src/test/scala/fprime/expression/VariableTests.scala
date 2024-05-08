@@ -10,7 +10,7 @@ class VariableTests extends AnyFunSuite:
     test("variable parser (green)") {
         val input = "x".asTokens
         summonParser[Variable].parse(input) should matchPattern {
-            case Success((_, Variable(symbol))) if symbol == "x" =>
+            case Success((_, Variable(symbol, _))) if symbol == "x" =>
         }
     }
 

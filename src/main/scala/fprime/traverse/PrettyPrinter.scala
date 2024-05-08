@@ -1,7 +1,6 @@
 package fprime.traverse
 
 import fprime.expression.{Abstraction, Application, Expression, Variable}
-import fprime.traverse.DeBruijnVariable
 
 import scala.PartialFunction.cond
 
@@ -11,21 +10,17 @@ object PrettyPrinter:
         case Indexed
         case NamelessLocals
 
-    private def traverse(expression: Expression, scope: Int)(using mode: Mode): String =
+    private def traverse[E <: Expression](expression: E, scope: Int)(using mode: Mode): String =
         expression match
-            case variable @ Variable(symbol) =>
+            case variable @ Variable(symbol, index) =>
                 mode match
                     case Mode.Named => variable.symbol
                     case _ =>
-                        variable match
-                            case deBruijn: DeBruijnVariable =>
-                                mode match
-                                    case Mode.Named   => throw RuntimeException("unreachable!")
-                                    case Mode.Indexed => deBruijn.index.toString
-                                    case Mode.NamelessLocals =>
-                                        if deBruijn.index <= scope then deBruijn.index.toString
-                                        else variable.symbol
-                            case _ => symbol
+                        mode match
+                            case Mode.Named   => throw RuntimeException("unreachable!")
+                            case Mode.Indexed => index.toString
+                            case Mode.NamelessLocals =>
+                                if index <= scope then index.toString else variable.symbol
 
             case Abstraction(parameter, body) =>
                 val bodyIsAbstraction = cond(body) { case Abstraction(_, _) => true }

@@ -3,30 +3,21 @@ package fprime.traverse
 import fprime.expression.{Abstraction, Application, Expression, Variable}
 
 object DeBruijnSubstitution:
-    private def traverse(
-        expression: Expression,
-        target: Int,
-        replacement: Expression,
-    ): Expression =
+    private def traverse[E <: Expression](expression: E, target: Int, replacement: E): E =
         expression match
-            case variable @ Variable(_) =>
-                variable match
-                    case deBruijn: DeBruijnVariable if deBruijn.index == target => replacement
-                    case _                                                      => variable
+            case variable @ Variable(_, index) =>
+                if index < 0 || index != target then variable
+                else replacement.asInstanceOf[replacement.type]
 
             case abstraction @ Abstraction(parameter, body) =>
                 DeBruijnShifter.shift(replacement, 1)
                 val b = traverse(abstraction.body, target + 1, replacement)
-                abstraction.copy(body = b)
+                abstraction.copy(body = b).asInstanceOf[abstraction.type]
 
             case application @ Application(callable, argument) =>
                 val c = traverse(application.callable, target, replacement)
                 val a = traverse(application.argument, target, replacement)
-                application.copy(callable = c, argument = a)
+                application.copy(callable = c, argument = a).asInstanceOf[application.type]
 
-    def substitute[E <: Expression, R <: E](
-        expression: E,
-        target: Int,
-        replacement: R,
-    ): E =
-        traverse(expression, target, replacement).asInstanceOf[E]
+    def substitute[E <: Expression](expression: E, target: Int, replacement: E): E =
+        traverse(expression, target, replacement)

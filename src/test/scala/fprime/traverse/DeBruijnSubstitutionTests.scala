@@ -21,6 +21,6 @@ class DeBruijnSubstitutionTests extends AnyFunSuite:
         val replacementDeBruijn = DeBruijnConverter.convert(replacement)
         val substituted =
             DeBruijnSubstitution.substitute(converted, target = 1, replacementDeBruijn)
-        val pretty = PrettyPrinter.pretty(substituted, mode = PrettyPrinter.Mode.NamelessLocals)
-        assert(pretty == "a (λ a) (λ a (λ a))")
+        val pretty = PrettyPrinter.pretty(substituted, mode = PrettyPrinter.Mode.Named)
+        assert(pretty == "a (λz. a) (λx. a (λz. a))")
     }
