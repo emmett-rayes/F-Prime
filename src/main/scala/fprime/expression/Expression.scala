@@ -32,6 +32,7 @@ object Expression:
         variable: Parsable[Variable],
         abstraction: Parsable[Abstraction[?, ?]],
         application: Parsable[Application[?, ?]],
+        ascription: Parsable[Ascription[?, ?]],
     ): Parsable[Expression] with
         private val parens = this.parser.between(Literal.parser("("), Literal.parser(")"))
         private var pending: Option[(Int, ClassTag[?])] = None
@@ -62,6 +63,7 @@ object Expression:
         override lazy val parser: Parser[Tokens, Expression] =
             abstraction.parser.nonRecur
                 .orElse(application.parser.nonRecur)
+                .orElse(ascription.parser.nonRecur)
                 .orElse(variable.parser.nonRecur)
                 .orElse(parens.nonRecur)
 
@@ -118,6 +120,20 @@ object Application:
                         Application(callable, argument): C
                     ).asInstanceOf[Application[C, A]]
                 )
+
+case class Ascription[E <: Expression, T <: Expression](expression: E, `type`: T)
+    extends Expression
+
+object Ascription:
+    given AscriptionParser[E <: Expression, T <: Expression](using
+        expression: Parsable[E],
+        `type`: Parsable[T],
+    ): Parsable[Ascription[E, T]] with
+        override lazy val parser: Parser[Tokens, Ascription[E, T]] =
+            expression.parser
+                .thenSkip(Literal.parser(":"))
+                .andThen(`type`.parser)
+                .map((e, t) => Ascription(e, t))
 
 extension (tag: ClassTag[?])
     private def name: String =

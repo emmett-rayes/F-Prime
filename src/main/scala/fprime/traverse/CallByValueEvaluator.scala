@@ -1,7 +1,7 @@
 package fprime.traverse
 
 import fprime.eval.BetaReduction
-import fprime.expression.{Abstraction, Application, Expression, Variable}
+import fprime.expression.*
 
 import scala.PartialFunction.cond
 
@@ -45,6 +45,8 @@ object CallByValueEvaluator extends BetaReduction:
                         // noinspection ScalaRedundantCast
                         Some(shiftedBody.asInstanceOf[E])
                     case _ => None
+
+            case Ascription(_, _) => ???
 
     override def reduceOnce[E <: Expression](
         expression: E,

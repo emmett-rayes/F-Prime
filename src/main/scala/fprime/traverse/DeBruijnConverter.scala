@@ -37,6 +37,8 @@ object DeBruijnConverter:
                 val a = traverse(argument, currentScope)
                 application.copy(callable = c, argument = a).asInstanceOf[application.type]
 
+            case Ascription(_, _) => ???
+
     def convert[E <: Expression](expression: E): E =
         given Context(0, mutable.Map())
         traverse(expression, 0)

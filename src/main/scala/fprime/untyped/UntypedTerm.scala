@@ -45,4 +45,6 @@ object UntypedTerm:
                 case e: UntypedVariableInner               => e
                 case e: UntypedAbstractionInner @unchecked => e
                 case e: UntypedApplicationInner @unchecked => e
+                case _ => throw RuntimeException("unreachable")
+                // match safety: a default parser that fails early is always defined
             }

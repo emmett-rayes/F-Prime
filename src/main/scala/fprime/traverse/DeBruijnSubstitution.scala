@@ -1,6 +1,6 @@
 package fprime.traverse
 
-import fprime.expression.{Abstraction, Application, Expression, Variable}
+import fprime.expression.*
 
 object DeBruijnSubstitution:
     private def traverse[E <: Expression](expression: E, target: Int, replacement: E): E =
@@ -18,6 +18,8 @@ object DeBruijnSubstitution:
                 val c = traverse(application.callable, target, replacement)
                 val a = traverse(application.argument, target, replacement)
                 application.copy(callable = c, argument = a).asInstanceOf[application.type]
+
+            case Ascription(_, _) => ???
 
     def substitute[E <: Expression](expression: E, target: Int, replacement: E): E =
         traverse(expression, target, replacement)

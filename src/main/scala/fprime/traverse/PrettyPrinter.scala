@@ -1,6 +1,6 @@
 package fprime.traverse
 
-import fprime.expression.{Abstraction, Application, Expression, Variable}
+import fprime.expression.*
 
 import scala.PartialFunction.cond
 
@@ -38,6 +38,8 @@ object PrettyPrinter:
                 var prettyArgument = traverse(argument, scope)
                 if argumentIsApplication then prettyArgument = s"($prettyArgument)"
                 s"$prettyCallable $prettyArgument"
+
+            case Ascription(_, _) => ???
 
     def pretty[E <: Expression](expression: E, mode: Mode = Mode.Named): String =
         given Mode = mode
