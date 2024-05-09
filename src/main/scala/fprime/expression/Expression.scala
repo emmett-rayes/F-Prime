@@ -1,30 +1,41 @@
 package fprime.expression
 
+import fprime.expression.Symbol.SymbolParser
 import fprime.parser.combinators.*
 import fprime.parser.{ParseError, Parser}
-import fprime.parsing.{Parsable, Tokens}
+import fprime.parsing.{Parsable, Tokens, summonParser}
 
+import scala.reflect.ClassTag
 import scala.util.{Failure, NotGiven}
 
 sealed trait Expression
 
 object Expression:
-    given (using
+    given UnusedParser[T, E](using NotGiven[T =:= Expression])(using
+        tag: ClassTag[T],
+        downcast: NotGiven[Conversion[E, T & E]],
+        expression: Parsable[E],
+    ): Parsable[T] with
+        override lazy val parser: Parser[Tokens, T] = input =>
+            Failure(
+              ParseError(input, s"${tag.name} is not supported for this expression type.")
+            )
+
+    given SpecializedParser[T, E](using NotGiven[T =:= Expression])(using
+        tag: ClassTag[T],
+        downcast: Conversion[E, T & E],
+        expression: Parsable[E],
+    ): Parsable[T] with
+        override lazy val parser: Parser[Tokens, T] = expression.parser.map(identity)
+
+    given ExpressionParser(using
         variable: Parsable[Variable],
         abstraction: Parsable[Abstraction[?, ?]],
         application: Parsable[Application[?, ?]],
     ): Parsable[Expression] with
-        import scala.reflect.ClassTag
-
         private val parens = this.parser.between(Literal.parser("("), Literal.parser(")"))
         private var pending: Option[(Int, ClassTag[?])] = None
         private var level = 0
-
-        extension (tag: ClassTag[?])
-            def name: String =
-                val string = tag.toString()
-                val components = string.split('.')
-                if components.isEmpty then tag.toString() else components.last
 
         extension [T](self: Parser[Tokens, T])
             private def nonRecur(using tag: ClassTag[T]): Parser[Tokens, T] = (input: Tokens) =>
@@ -57,14 +68,15 @@ object Expression:
 case class Variable(symbol: Symbol, index: Int = -1) extends Expression
 
 object Variable:
-    given (using symbol: Parsable[Symbol]): Parsable[Variable] with
-        override lazy val parser: Parser[Tokens, Variable] = symbol.parser.map(s => Variable(s))
+    given VariableParser: Parsable[Variable] with
+        override lazy val parser: Parser[Tokens, Variable] =
+            summonParser[Symbol].map(s => Variable(s))
 
 case class Abstraction[P <: Expression, B <: Expression](parameter: P, body: B)
     extends Expression
 
 object Abstraction:
-    given [P <: Expression, B <: Expression](using
+    given AbstractionParser[P <: Expression, B <: Expression](using
         parameter: Parsable[P],
         body: Parsable[B],
         downcast: Conversion[Abstraction[P, B], B & Abstraction[P, B]], // shape preserving
@@ -107,8 +119,8 @@ object Application:
                     ).asInstanceOf[Application[C, A]]
                 )
 
-given [T <: Expression, E <: Expression](using NotGiven[T =:= Expression])(using
-    downcast: Conversion[E, T & E],
-    expression: Parsable[E],
-): Parsable[T] with
-    override lazy val parser: Parser[Tokens, T] = expression.parser.map(identity)
+extension (tag: ClassTag[?])
+    private def name: String =
+        val string = tag.toString()
+        val components = string.split('.')
+        if components.isEmpty then tag.toString() else components.last

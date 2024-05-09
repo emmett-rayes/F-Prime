@@ -1,7 +1,8 @@
 package fprime.util
 
 import fprime.parsing.{asTokens, summonParser}
-import fprime.untyped.{UntypedTerm, UntypedTermParser}
+import fprime.untyped.UntypedTerm
+import fprime.untyped.UntypedTerm.UntypedTermParser
 
 def parseTerm(string: String): UntypedTerm =
     val input = string.asTokens

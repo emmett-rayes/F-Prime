@@ -3,7 +3,8 @@ package fprime.repl
 import fprime.parser.result
 import fprime.parsing.summonParser
 import fprime.traverse.{CallByValueEvaluator, DeBruijnConverter, PrettyPrinter}
-import fprime.untyped.{UntypedTerm, UntypedTermParser}
+import fprime.untyped.UntypedTerm
+import fprime.untyped.UntypedTerm.UntypedTermParser
 
 import scala.io.StdIn.readLine
 import scala.util.{Failure, Success}
