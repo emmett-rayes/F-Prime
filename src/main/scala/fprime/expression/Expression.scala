@@ -11,18 +11,17 @@ import scala.util.{Failure, NotGiven}
 sealed trait Expression
 
 object Expression:
-    given UnusedParser[T, E](using NotGiven[T =:= Expression])(using
-        tag: ClassTag[T],
-        downcast: NotGiven[Conversion[E, T & E]],
-        expression: Parsable[E],
+    given UnusedParser[T <: Expression](using tag: ClassTag[T])(using
+        NotGiven[T =:= Expression],
+        NotGiven[Parsable[T]],
     ): Parsable[T] with
         override lazy val parser: Parser[Tokens, T] = input =>
             Failure(
               ParseError(input, s"${tag.name} is not supported for this expression type.")
             )
 
-    given SpecializedParser[T, E](using NotGiven[T =:= Expression])(using
-        tag: ClassTag[T],
+    given SpecializedParser[T <: Expression, E <: Expression](using
+        term: NotGiven[T =:= Expression],
         downcast: Conversion[E, T & E],
         expression: Parsable[E],
     ): Parsable[T] with
