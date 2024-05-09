@@ -1,11 +1,9 @@
 package fprime.util
 
-import fprime.parsing.{asTokens, summonParser}
-import fprime.untyped.UntypedTerm
-import fprime.untyped.UntypedTerm.UntypedTermParser
+import fprime.parsing.{Parsable, asTokens}
 
-def parseTerm(string: String): UntypedTerm =
+def parse[T](string: String)(using parsable: Parsable[T]): T =
     val input = string.asTokens
-    val (remaining, output) = summonParser[UntypedTerm].parse(input).get
+    val (remaining, output) = parsable.parser.parse(input).get
     assert(remaining.isEmpty, s"Input was not fully parsed. Remaining: $remaining")
     output

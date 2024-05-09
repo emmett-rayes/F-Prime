@@ -1,12 +1,14 @@
 package fprime.traverse
 
-import fprime.util.parseTerm
+import fprime.untyped.UntypedTerm
+import fprime.untyped.UntypedTerm.UntypedTermParser
+import fprime.util.parse
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.{matchPattern, should}
 
 class DeBruijnShifterTests extends AnyFunSuite:
     test("shift") {
-        val term = parseTerm("(λx.λy. x (y w))")
+        val term = parse[UntypedTerm]("(λx.λy. x (y w))")
         val converted = DeBruijnConverter.convert(term)
         val shifted = DeBruijnShifter.shift(converted, 2)
         val pretty = PrettyPrinter.pretty(shifted, mode = PrettyPrinter.Mode.Indexed)
@@ -14,7 +16,7 @@ class DeBruijnShifterTests extends AnyFunSuite:
     }
 
     test("nested shift") {
-        val term = parseTerm("(λx. x w (λy. y x w))")
+        val term = parse[UntypedTerm]("(λx. x w (λy. y x w))")
         val converted = DeBruijnConverter.convert(term)
         val shifted = DeBruijnShifter.shift(converted, 2)
         val pretty = PrettyPrinter.pretty(shifted, mode = PrettyPrinter.Mode.Indexed)

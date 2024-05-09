@@ -1,13 +1,14 @@
 package fprime.untyped
 
 import fprime.traverse.{DeBruijnConverter, PrettyPrinter}
-import fprime.util.parseTerm
+import fprime.untyped.UntypedTerm.UntypedTermParser
+import fprime.util.parse
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.{matchPattern, should}
 
 class UntypedCombinatorsTests extends AnyFunSuite:
     private def process(input: String): String =
-        val term = parseTerm(input)
+        val term = parse[UntypedTerm](input)
         val converted = DeBruijnConverter.convert(term)
         PrettyPrinter.pretty(converted, mode = PrettyPrinter.Mode.NamelessLocals)
 
