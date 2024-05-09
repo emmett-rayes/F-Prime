@@ -18,7 +18,10 @@ object DeBruijnShifter:
                 val a = traverse(argument, place, cutoff)
                 application.copy(callable = c, argument = a).asInstanceOf[application.type]
 
-            case Ascription(_, _) => ???
+            case ascription @ Ascription(expression, targetType) =>
+                val e = traverse(expression, place, cutoff)
+                val t = traverse(targetType, place, cutoff)
+                ascription.copy(expression = e, `type` = t).asInstanceOf[ascription.type]
 
     def shift[E <: Expression](expression: E, place: Int): E =
         traverse(expression, place, 1)

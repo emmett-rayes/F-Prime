@@ -39,7 +39,10 @@ object PrettyPrinter:
                 if argumentIsApplication then prettyArgument = s"($prettyArgument)"
                 s"$prettyCallable $prettyArgument"
 
-            case Ascription(_, _) => ???
+            case Ascription(expression, targetType) =>
+                val prettyExpression = traverse(expression, scope)
+                val prettyType = traverse(targetType, scope)
+                s"$prettyExpression : $prettyType"
 
     def pretty[E <: Expression](expression: E, mode: Mode = Mode.Named): String =
         given Mode = mode

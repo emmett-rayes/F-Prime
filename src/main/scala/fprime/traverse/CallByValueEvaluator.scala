@@ -46,7 +46,11 @@ object CallByValueEvaluator extends BetaReduction:
                         Some(shiftedBody.asInstanceOf[E])
                     case _ => None
 
-            case Ascription(_, _) => ???
+            case ascription @ Ascription(expression, targetType) =>
+                traverse(expression) match
+                    case None => None
+                    case Some(e) =>
+                        Some(ascription.copy(expression = e).asInstanceOf[ascription.type])
 
     override def reduceOnce[E <: Expression](
         expression: E,
