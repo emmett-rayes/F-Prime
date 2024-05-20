@@ -48,11 +48,6 @@ object Expression:
 
         extension [T](self: Parser[Tokens, T])
             private def nonRecur(using tag: ClassTag[T]): Parser[Tokens, T] = (input: Tokens) =>
-                /*
-                println(
-                  "\t" * level + s"pending ${pending.map(_._2.name)} - parsing ${tag.name} on $input"
-                )
-                 */
                 if pending.isDefined && pending.get._1 == input.size && pending.get._2.equals(
                       tag
                     )
