@@ -7,6 +7,7 @@
       <option name="featureWarnings" value="true" />
       <parameters>
         <parameter value="-explain" />
+        <parameter value="-source:future" />
       </parameters>
     </profile>
   </component>

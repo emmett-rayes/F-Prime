@@ -7,6 +7,7 @@ lazy val root = (project in file("."))
       name := "f-prime",
       scalacOptions += "-explain",
       scalacOptions += "-feature",
+      scalacOptions += "-source:future",
       scalacOptions += "-language:implicitConversions",
       libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18" % Test
     )
