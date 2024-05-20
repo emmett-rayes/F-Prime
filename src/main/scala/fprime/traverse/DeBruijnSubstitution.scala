@@ -5,6 +5,8 @@ import fprime.expression.*
 object DeBruijnSubstitution:
     private def traverse[E <: Expression](expression: E, target: Int, replacement: E): E =
         expression match
+            case constant @ Constant(_) => constant
+
             case variable @ Variable(_, index) =>
                 if index < 0 || index != target then variable
                 else replacement.asInstanceOf[replacement.type]
