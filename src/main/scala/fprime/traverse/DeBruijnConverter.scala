@@ -28,7 +28,15 @@ object DeBruijnConverter:
                 variable.copy(index = currentScope - bindingScope).asInstanceOf[variable.type]
 
             case abstraction @ Abstraction(parameter, body) =>
-                val scopes = context.variableScopes.getOrElseUpdate(parameter, mutable.Stack())
+                val key = parameter match
+                    case variable @ Variable(_, _)            => variable
+                    case Ascription(variable: Variable[?], _) => variable
+                    case _ =>
+                        throw Exception(
+                          "Currently, only a variable or an ascription is allowed as abstraction parameter"
+                        )
+
+                val scopes = context.variableScopes.getOrElseUpdate(key, mutable.Stack())
                 scopes.push(currentScope)
                 val b = traverse(body, currentScope + 1)
                 scopes.pop()
