@@ -1,9 +1,9 @@
 package fprime.repl
 
 import fprime.parsing.{skipWhitespace, summonParser}
+import fprime.simple.SimplyTypedTerm
+import fprime.simple.SimplyTypedTerm.SimplyTypedTermParser
 import fprime.traverse.{CallByValueEvaluator, DeBruijnConverter, PrettyPrinter}
-import fprime.untyped.UntypedTerm
-import fprime.untyped.UntypedTerm.UntypedTermParser
 
 import scala.io.StdIn.readLine
 import scala.util.control.Breaks.{break, breakable}
@@ -19,7 +19,7 @@ private def error(): Unit =
 
 @main
 def repl(): Nothing =
-    val parser = summonParser[UntypedTerm]
+    val parser = summonParser[SimplyTypedTerm]
     while true do
         breakable {
             val input = prompt()
