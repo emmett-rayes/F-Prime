@@ -1,8 +1,9 @@
 package fprime.parser
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
-case class ParseError[Input](input: Input, message: String) extends Exception(message)
+case class ParseError[Input](input: Input, message: String = null, cause: Throwable = null)
+    extends Exception(message, cause)
 
 type ParserResult[Input, Output] = Try[(Input, Output)]
 
@@ -14,7 +15,14 @@ trait Parser[Input, +Output]:
     def parse(input: Input): ParserResult[Input, Output]
 
     final def flatMap[Mapped](f: Output => Parser[Input, Mapped]): Parser[Input, Mapped] =
-        input => parse(input).flatMap((remaining, output) => f(output).parse(remaining))
+        input =>
+            parse(input).flatMap((remaining, output) =>
+                Try {
+                    f(output).parse(remaining) match
+                        case Failure(exception) => throw ParseError(input, cause = exception)
+                        case Success(result)    => result
+                }
+            )
 
     final def orElse[Else](other: => Parser[Input, Else]): Parser[Input, Output | Else] =
         input => parse(input).orElse(other.parse(input))
