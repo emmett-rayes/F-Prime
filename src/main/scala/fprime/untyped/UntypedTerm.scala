@@ -1,6 +1,6 @@
 package fprime.untyped
 
-import fprime.expression.*
+import fprime.expression.{*, given}
 import fprime.parser.Parser
 import fprime.parser.combinators.map
 import fprime.parsing.{Parsable, Tokens, summonParser}
@@ -46,5 +46,4 @@ object UntypedTerm:
                 case e: UntypedAbstractionInner @unchecked => e
                 case e: UntypedApplicationInner @unchecked => e
                 case _ => throw RuntimeException("unreachable")
-                // match safety: a default parser that fails early is always defined
             }

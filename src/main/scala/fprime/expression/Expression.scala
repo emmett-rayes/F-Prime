@@ -8,25 +8,32 @@ import fprime.parsing.{Parsable, Tokens, summonParser}
 import scala.reflect.ClassTag
 import scala.util.{Failure, NotGiven}
 
+given UnusedParser[T <: Expression](using tag: ClassTag[T])(using
+    NotGiven[T =:= Expression],
+    NotGiven[Parsable[T]],
+    NotGiven[SpecializedParser[T, ?]],
+): Parsable[T] with
+    override lazy val parser: Parser[Tokens, T] = input =>
+        Failure(
+          ParseError(input, s"${tag.name} is not supported for this expression type.")
+        )
+
+given SpecializedParser[T <: Expression, E <: Expression](using
+    filter: NotGiven[T =:= Expression],
+    downcast: Conversion[E, T & E],
+    expression: Parsable[E],
+): Parsable[T] with
+    override lazy val parser: Parser[Tokens, T] = expression.parser.map(downcast)
+
+extension (tag: ClassTag[?])
+    private def name: String =
+        val string = tag.toString()
+        val components = string.split('.')
+        if components.isEmpty then tag.toString() else components.last
+
 sealed trait Expression
 
 object Expression:
-    given UnusedParser[T <: Expression](using tag: ClassTag[T])(using
-        NotGiven[T =:= Expression],
-        NotGiven[Parsable[T]],
-    ): Parsable[T] with
-        override lazy val parser: Parser[Tokens, T] = input =>
-            Failure(
-              ParseError(input, s"${tag.name} is not supported for this expression type.")
-            )
-
-    given SpecializedParser[T <: Expression, E <: Expression](using
-        term: NotGiven[T =:= Expression],
-        downcast: Conversion[E, T & E],
-        expression: Parsable[E],
-    ): Parsable[T] with
-        override lazy val parser: Parser[Tokens, T] = expression.parser.map(identity)
-
     given ExpressionParser(using
         variable: Parsable[Variable],
         abstraction: Parsable[Abstraction[?, ?]],
@@ -66,14 +73,14 @@ object Expression:
                 .orElse(variable.parser.nonRecur)
                 .orElse(parens.nonRecur)
 
-case class Variable(symbol: Symbol, index: Int = -1) extends Expression
+open case class Variable(symbol: Symbol, index: Int = -1) extends Expression
 
 object Variable:
     given VariableParser: Parsable[Variable] with
         override lazy val parser: Parser[Tokens, Variable] =
             summonParser[Symbol].map(s => Variable(s))
 
-case class Abstraction[P <: Expression, B <: Expression](parameter: P, body: B)
+open case class Abstraction[+P <: Expression, +B <: Expression](parameter: P, body: B)
     extends Expression
 
 object Abstraction:
@@ -100,7 +107,7 @@ object Abstraction:
                     // downcast safety: cannot fail because we've upcasted in the last folding step
                 )
 
-case class Application[C <: Expression, A <: Expression](callable: C, argument: A)
+open case class Application[+C <: Expression, +A <: Expression](callable: C, argument: A)
     extends Expression
 
 object Application:
@@ -109,8 +116,6 @@ object Application:
         argument: Parsable[A],
         downcast: Conversion[Application[C, A], C & Application[C, A]], // shape preserving
     ): Parsable[Application[C, A]] with
-        private val parens = this.parser.between(Literal.parser("("), Literal.parser(")"))
-
         override lazy val parser: Parser[Tokens, Application[C, A]] =
             callable.parser
                 .andThen(argument.parser.atLeast(1))
@@ -120,7 +125,7 @@ object Application:
                     ).asInstanceOf[Application[C, A]]
                 )
 
-case class Ascription[E <: Expression, T <: Expression](expression: E, `type`: T)
+open case class Ascription[+E <: Expression, +T <: Expression](expression: E, `type`: T)
     extends Expression
 
 object Ascription:
@@ -133,9 +138,3 @@ object Ascription:
                 .thenSkip(Literal.parser(":"))
                 .andThen(`type`.parser)
                 .map((e, t) => Ascription(e, t))
-
-extension (tag: ClassTag[?])
-    private def name: String =
-        val string = tag.toString()
-        val components = string.split('.')
-        if components.isEmpty then tag.toString() else components.last
