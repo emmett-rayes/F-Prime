@@ -1,24 +1,22 @@
 package fprime.expression
 
 import fprime.parser.{ParseError, Parser}
-import fprime.parsing.{Tokens, asTokens, skipWhitespace}
+import fprime.parsing.{Parsable, Tokens, asTokens, skipWhitespace}
 
 import scala.util.Try
 
-type Literal = String
+type Literal = Singleton & String
 
 object Literal:
-    def make(string: String): Literal = string
-
-    def parser(expected: Literal): Parser[Tokens, Literal] = (input: Tokens) =>
-        val trimmed = input.skipWhitespace
-        Try {
-            if !trimmed.startsWith(expected.asTokens) then
-                throw ParseError(input, s"Expected $expected at this position. ${trimmed.head}")
-            val (matched, remaining) = trimmed.splitAt(expected.length)
-            (remaining, matched.mkString)
-        }
-
-extension (t: Literal.type)
-    def parser(string: String): Parser[Tokens, Literal] =
-        Literal.parser(Literal.make(string))
+    given LiteralParser[S <: Literal](using expected: ValueOf[S]): Parsable[S] with
+        override lazy val parser: Parser[Tokens, S] = (input: Tokens) =>
+            val trimmed = input.skipWhitespace
+            Try {
+                if !trimmed.startsWith(expected.value.asTokens) then
+                    throw ParseError(
+                      input,
+                      s"Expected ${expected.value} at this position. ${trimmed.head}",
+                    )
+                val (matched, remaining) = trimmed.splitAt(expected.value.length)
+                (remaining, matched.mkString.asInstanceOf[S])
+            }

@@ -1,5 +1,6 @@
 package fprime.expression
 
+import fprime.expression.Literal.LiteralParser
 import fprime.expression.Symbol.SymbolParser
 import fprime.parser.combinators.*
 import fprime.parser.{ParseError, Parser}
@@ -40,7 +41,7 @@ object Expression:
         application: Parsable[Application[?, ?]],
         ascription: Parsable[Ascription[?, ?]],
     ): Parsable[Expression] with
-        private val parens = this.parser.between(Literal.parser("("), Literal.parser(")"))
+        private val parens = this.parser.between(summonParser["("], summonParser[")"])
         private var pending: Option[(Int, ClassTag[?])] = None
         private var level = 0
 
@@ -90,9 +91,9 @@ object Abstraction:
         downcast: Conversion[Abstraction[P, B], B & Abstraction[P, B]], // shape preserving
     ): Parsable[Abstraction[P, B]] with
 
-        private val parameters = parameter.parser.atLeast(1).thenSkip(Literal.parser("."))
+        private val parameters = parameter.parser.atLeast(1).thenSkip(summonParser["."])
         private val lambda =
-            Literal.parser("λ") `orElse` Literal.parser("@") `orElse` Literal.parser("\\")
+            summonParser["λ"] `orElse` summonParser["@"] `orElse` summonParser["\\"]
 
         override lazy val parser: Parser[Tokens, Abstraction[P, B]] =
             lambda
@@ -135,6 +136,6 @@ object Ascription:
     ): Parsable[Ascription[E, T]] with
         override lazy val parser: Parser[Tokens, Ascription[E, T]] =
             expression.parser
-                .thenSkip(Literal.parser(":"))
+                .thenSkip(summonParser[":"])
                 .andThen(`type`.parser)
                 .map((e, t) => Ascription(e, t))
