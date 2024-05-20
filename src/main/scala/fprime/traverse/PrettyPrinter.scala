@@ -12,6 +12,8 @@ object PrettyPrinter:
 
     private def traverse[E <: Expression](expression: E, scope: Int)(using mode: Mode): String =
         expression match
+            case Constant(constant) => constant
+
             case variable @ Variable(symbol, index) =>
                 mode match
                     case Mode.Named => variable.symbol
