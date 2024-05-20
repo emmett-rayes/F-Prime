@@ -9,7 +9,7 @@ private type UntypedVariableInner = Variable
 private type UntypedAbstractionInner = Abstraction[UntypedVariable, UntypedTerm]
 private type UntypedApplicationInner = Application[UntypedTerm, UntypedTerm]
 
-type UntypedTerm = Expression & (UntypedVariable | UntypedAbstraction | UntypedApplication)
+type UntypedTerm = UntypedVariable | UntypedAbstraction | UntypedApplication
 
 class UntypedVariable(symbol: Symbol) extends UntypedVariableInner(symbol)
 
@@ -41,6 +41,7 @@ object UntypedTerm:
     given UntypedTermParser: Parsable[UntypedTerm] with
         override lazy val parser: Parser[Tokens, UntypedTerm] =
             // cast safety: the correct parser was supplied by the local given
+            // match safety: a default parser that fails early is always defined
             summonParser[Expression].map {
                 case e: UntypedVariableInner               => e
                 case e: UntypedAbstractionInner @unchecked => e
