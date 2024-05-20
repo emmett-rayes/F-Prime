@@ -5,6 +5,8 @@ import fprime.expression.*
 object DeBruijnShifter:
     private def traverse[E <: Expression](expression: E, place: Int, cutoff: Int): E =
         expression match
+            case constant @ Constant(_) => constant
+
             case variable @ Variable(_, index) =>
                 if index < cutoff then variable
                 else variable.copy(index = index + place).asInstanceOf[variable.type]
