@@ -21,4 +21,4 @@ trait BetaReduction:
             reduceOnce(current, normalize) match
                 case None          => return trace.toList
                 case Some(reduced) => current = reduced
-        throw RuntimeException("unreachable!")
+        throw Exception("unreachable!")

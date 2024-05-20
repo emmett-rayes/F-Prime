@@ -17,7 +17,7 @@ object PrettyPrinter:
                     case Mode.Named => variable.symbol
                     case _ =>
                         mode match
-                            case Mode.Named   => throw RuntimeException("unreachable!")
+                            case Mode.Named   => throw Exception("unreachable!")
                             case Mode.Indexed => index.toString
                             case Mode.NamelessLocals =>
                                 if index <= scope then index.toString else variable.symbol

@@ -41,4 +41,4 @@ def repl(): Nothing =
                         )
         }
 
-    throw RuntimeException("unreachable!")
+    throw Exception("unreachable!")
