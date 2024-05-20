@@ -13,18 +13,17 @@ class SimplyTypedTermTests extends AnyFunSuite:
         inside(term) { case SimplyTypedAbstraction(parameters, body) =>
             inside(parameters) { case Ascription(Variable(symbol, _), _type) =>
                 assert(symbol == "x")
-                inside(_type) {
-                    case SimpleFunctionType(Application(_, source), target) =>
-                        inside(source) {
-                            case SimpleUninterpretedType(constant) => constant == "A"
-                        }
-                        inside(target) {
-                            case SimpleUninterpretedType(constant) => constant == "A"
-                        }
+                inside(_type) { case SimpleFunctionType(Application(_, source), target) =>
+                    inside(source) { case SimpleUninterpretedType(constant) =>
+                        constant == "A"
+                    }
+                    inside(target) { case SimpleUninterpretedType(constant) =>
+                        constant == "A"
+                    }
                 }
             }
-            inside(body) {
-                case SimplyTypedVariable(symbol, _) => assert(symbol == "x")
+            inside(body) { case SimplyTypedVariable(symbol, _) =>
+                assert(symbol == "x")
             }
         }
     }
