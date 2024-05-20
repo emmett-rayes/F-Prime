@@ -135,6 +135,17 @@ object Application:
                     ).asInstanceOf[Application[C, A]]
                 )
 
+    given SingleApplicationParser[C <: Expression, A <: Expression](using
+        callable: Parsable[C],
+        argument: Parsable[A],
+        downcast: NotGiven[Conversion[Application[C, A], C & Application[C, A]]],
+    ): Parsable[Application[C, A]] with
+        override lazy val parser: Parser[Tokens, Application[C, A]] = input =>
+            val p = callable.parser
+                .andThen(argument.parser)
+                .map((callable, argument) => Application(callable, argument))
+            p.parse(input)
+
 open case class Ascription[+E <: Expression, +T <: Expression](expression: E, `type`: T)
     extends Expression
 
