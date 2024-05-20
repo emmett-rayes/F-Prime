@@ -8,8 +8,9 @@ import scala.PartialFunction.cond
 object CallByValueEvaluator extends BetaReduction:
     private def traverse[E <: Expression](expression: E)(using normalize: Boolean): Option[E] =
         expression match
-            case _: Variable[?] =>
-                None
+            case Constant(_) => None
+
+            case Variable(_, _) => None
 
             case abstraction @ Abstraction(_, body) =>
                 if !normalize then None
