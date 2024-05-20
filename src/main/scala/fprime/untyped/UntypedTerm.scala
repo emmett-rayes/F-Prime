@@ -5,7 +5,7 @@ import fprime.parser.Parser
 import fprime.parser.combinators.map
 import fprime.parsing.{Parsable, Tokens, summonParser}
 
-private type UntypedVariableInner = Variable
+private type UntypedVariableInner = Variable[UntypedTerm]
 private type UntypedAbstractionInner = Abstraction[UntypedVariable, UntypedTerm]
 private type UntypedApplicationInner = Application[UntypedTerm, UntypedTerm]
 
@@ -43,8 +43,8 @@ object UntypedTerm:
             // cast safety: the correct parser was supplied by the local given
             // match safety: a default parser that fails early is always defined
             summonParser[Expression].map {
-                case e: UntypedVariableInner               => e
+                case e: UntypedVariableInner @unchecked    => e
                 case e: UntypedAbstractionInner @unchecked => e
                 case e: UntypedApplicationInner @unchecked => e
-                case _ => throw RuntimeException("unreachable")
+                case _                                     => throw Exception("unreachable")
             }
