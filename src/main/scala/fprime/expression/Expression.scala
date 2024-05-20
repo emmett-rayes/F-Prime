@@ -36,6 +36,7 @@ sealed trait Expression
 
 object Expression:
     given ExpressionParser(using
+        constant: Parsable[Constant[?]],
         variable: Parsable[Variable[?]],
         abstraction: Parsable[Abstraction[?, ?]],
         application: Parsable[Application[?, ?]],
@@ -71,8 +72,16 @@ object Expression:
             abstraction.parser.nonRecur
                 .orElse(application.parser.nonRecur)
                 .orElse(ascription.parser.nonRecur)
+                .orElse(constant.parser.nonRecur)
                 .orElse(variable.parser.nonRecur)
                 .orElse(parens.nonRecur)
+
+open case class Constant[C <: Literal](constant: C) extends Expression
+
+object Constant:
+    given ConstantParser[C <: Literal](using c: ValueOf[C]): Parsable[Constant[C]] with
+        override lazy val parser: Parser[Tokens, Constant[C]] =
+            summonParser[C].map(s => Constant(s))
 
 open case class Variable[T <: Expression](symbol: Symbol, index: Int = -1) extends Expression
 
