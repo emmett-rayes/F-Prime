@@ -14,6 +14,8 @@ object DeBruijnConverter:
         context: Context
     ): E =
         expression match
+            case constant @ Constant(_) => constant
+
             case variable @ Variable(symbol, index) =>
                 val scopes = context.variableScopes.getOrElseUpdate(variable, mutable.Stack())
                 val bindingScope = scopes.topOption() match
