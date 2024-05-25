@@ -10,7 +10,7 @@ private type SimpleUninterpretedTypeInner = Constant["A"]
 private type SimpleFunctionTypeInner =
     Application[Application[Constant["=>"], SimpleType], SimpleType]
 
-type SimpleType = SimpleUninterpretedTypeInner | SimpleFunctionType
+type SimpleType = SimpleUninterpretedType | SimpleFunctionType
 
 class SimpleUninterpretedType(constant: "A") extends SimpleUninterpretedTypeInner(constant)
 
